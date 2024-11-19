@@ -13,7 +13,16 @@
         android:theme="@style/Theme.PaperTrail"
         tools:targetApi="31">
         <activity
-            android:name=".MainActivity"
+            android:name=".StickerScreen"
+            android:exported="false" />
+        <activity
+            android:name=".ViewJournal"
+            android:exported="false" />
+        <activity
+            android:name=".EditPage"
+            android:exported="false" />
+        <activity
+            android:name=".HomeScreen"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
