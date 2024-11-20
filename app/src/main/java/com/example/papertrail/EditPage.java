@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
@@ -16,6 +17,8 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 
@@ -25,7 +28,6 @@ public class EditPage extends AppCompatActivity {
     static final int CAMERA_REQUEST = 2;    // For taking a picture using the camera
 
     FrameLayout frameLayoutPage;
-    Button buttonAddImage;
     ImageView imageViewPage;
 
     private ScaleGestureDetector scaleGestureDetector;
@@ -33,18 +35,49 @@ public class EditPage extends AppCompatActivity {
     private float initialX = 0f;
     private float initialY = 0f;
 
+    private BottomNavigationView bottomNavigationView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_page);
 
+
         frameLayoutPage = findViewById(R.id.frameLayoutPage);
-        buttonAddImage = findViewById(R.id.buttonAddImage);
 
         // Initialize ScaleGestureDetector to handle pinch to zoom
         scaleGestureDetector = new ScaleGestureDetector(this, new ScaleListener());
 
-        buttonAddImage.setOnClickListener(v -> showImagePickerDialog());
+        bottomNavigationView = findViewById(R.id.bottom_navigation);
+
+        // Add items to BottomNavigationView dynamically
+        bottomNavigationView.getMenu().add(0, 1, 0, "Image").setIcon(R.drawable.ic_image);
+        bottomNavigationView.getMenu().add(0, 2, 1, "Text").setIcon(R.drawable.ic_text);
+        bottomNavigationView.getMenu().add(0, 3, 2, "Stickers").setIcon(R.drawable.ic_stickers);
+        bottomNavigationView.post(new Runnable() {
+            @Override
+            public void run() {
+                bottomNavigationView.setSelectedItemId(-1); // This prevents the default selection
+            }
+        });
+        // Handle navigation item selections
+        bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(MenuItem item) {
+
+                switch (item.getItemId()) {
+                    case 1:
+                        showImagePickerDialog();
+                        break;
+                    case 2:
+
+                        break;
+                    case 3:
+
+                        break;
+                }
+                return true;
+            }
+        });
     }
 
     // Dialog for choosing between Camera or Gallery

@@ -4,12 +4,12 @@
     <item
         android:id="@+id/nav_image"
         android:icon="@drawable/ic_image"
-    android:title="Image" />
+        android:title="Image" />
 
     <item
         android:id="@+id/nav_stickers"
         android:icon="@drawable/ic_stickers"
-    android:title="Stickers" />
+        android:title="Stickers" />
 
     <item
         android:id="@+id/nav_text"

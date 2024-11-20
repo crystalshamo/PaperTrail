@@ -5,12 +5,13 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@android:color/white"
     tools:context=".EditPage">
 
         <FrameLayout
             android:id="@+id/frameLayoutPage"
-            android:layout_width="500dp"
-            android:layout_height="500dp"
+            android:layout_width="match_parent"
+            android:layout_height="700dp"
             android:background="@android:color/white">
         </FrameLayout>
 
@@ -21,7 +22,7 @@
             android:text="Previous"
             android:layout_below="@id/frameLayoutPage"
             android:layout_alignParentStart="true"
-            android:layout_marginTop="16dp" />
+            android:backgroundTint="#B98FD3" />
 
         <Button
             android:id="@+id/buttonNext"
@@ -30,23 +31,25 @@
             android:text="Next"
             android:layout_below="@id/frameLayoutPage"
             android:layout_alignParentEnd="true"
-            android:layout_marginTop="16dp" />
-
-        <Button
-            android:id="@+id/buttonAddImage"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Add Image"
-            android:layout_below="@id/buttonPrev"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="16dp" />
+            android:backgroundTint="#B98FD3" />
 
         <Button
             android:id="@+id/buttonSavePage"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Save Page"
-            android:layout_below="@id/buttonAddImage"
+            android:layout_below="@id/frameLayoutPage"
             android:layout_centerHorizontal="true"
-            android:layout_marginTop="16dp" />
+            android:backgroundTint="#B98FD3" />
+
+        <com.google.android.material.bottomnavigation.BottomNavigationView
+            android:id="@+id/bottom_navigation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            app:itemIconTint="@android:color/white"
+            app:itemTextColor="@android:color/white"
+            app:itemBackground="@drawable/bottom_nav_selected_style"
+            android:background="#B98FD3"
+        />
     </RelativeLayout>
