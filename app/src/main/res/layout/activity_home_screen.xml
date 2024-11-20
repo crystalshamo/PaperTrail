@@ -1,19 +1,78 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".HomeScreen">
 
+
     <TextView
+        android:id="@+id/titleText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello World!"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:text="Paper Trail"
+        android:textStyle="bold"
+        android:fontFamily="serif-monospace"
+        android:textSize="30sp"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+
+    <ImageButton
+        android:id="@+id/addJournalButton"
+        android:layout_width="45dp"
+        android:layout_height="wrap_content"
+        android:background="@drawable/add_icon"
+        android:layout_below="@id/titleText"
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="20dp"
+        android:layout_marginStart="350dp"/>
+
+    <!-- ScrollView for GridView -->
+    <ScrollView
+        android:id="@+id/scrollView"
+        android:layout_width="370dp"
+        android:layout_height="370dp"
+        android:layout_below="@id/addJournalButton"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp">
+
+
+        <GridView
+            android:id="@+id/gridView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:numColumns="2"
+            android:verticalSpacing="15dp"
+            android:horizontalSpacing="10dp"
+            android:stretchMode="columnWidth"/>
+    </ScrollView>
+
+
+    <LinearLayout
+        android:id="@+id/buttonLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_centerHorizontal="true"
+        android:gravity="center"
+        android:layout_below="@id/scrollView"
+        android:layout_marginTop="20dp">
+
+        <ImageButton
+            android:id="@+id/editJournalButton"
+            android:layout_width="45dp"
+            android:layout_height="45dp"
+            android:background="@drawable/edit_icon" />
+
+        <ImageButton
+            android:id="@+id/deleteJournalButton"
+            android:layout_width="45dp"
+            android:layout_height="45dp"
+            android:background="@drawable/delete_icon"
+            android:layout_marginStart="20dp" />
+    </LinearLayout>
+
+</RelativeLayout>
