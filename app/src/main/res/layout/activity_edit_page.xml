@@ -7,34 +7,46 @@
     android:layout_height="match_parent"
     tools:context=".EditPage">
 
-        <!-- ImageView to show the image -->
-    <ImageView
-        android:id="@+id/photoEditorImageView"
-        android:layout_width="match_parent"
-        android:layout_height="603dp"
-        android:contentDescription="Photo Editor Image"
-        android:scaleType="fitCenter"
-        android:src="@android:color/white" />
+        <FrameLayout
+            android:id="@+id/frameLayoutPage"
+            android:layout_width="500dp"
+            android:layout_height="500dp"
+            android:background="@android:color/white">
+        </FrameLayout>
 
-        <!-- Button to open gallery -->
+        <Button
+            android:id="@+id/buttonPrev"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Previous"
+            android:layout_below="@id/frameLayoutPage"
+            android:layout_alignParentStart="true"
+            android:layout_marginTop="16dp" />
 
-    <!-- Button to save the image -->
+        <Button
+            android:id="@+id/buttonNext"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Next"
+            android:layout_below="@id/frameLayoutPage"
+            android:layout_alignParentEnd="true"
+            android:layout_marginTop="16dp" />
 
-    <Button
-        android:id="@+id/selectImageButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_marginBottom="48dp"
-        android:text="Select Image" />
+        <Button
+            android:id="@+id/buttonAddImage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Add Image"
+            android:layout_below="@id/buttonPrev"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="16dp" />
 
-    <Button
-        android:id="@+id/saveImageButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_marginStart="160dp"
-        android:layout_marginBottom="48dp"
-        android:layout_toEndOf="@id/selectImageButton"
-        android:text="Save Image" />
-</RelativeLayout>
+        <Button
+            android:id="@+id/buttonSavePage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Save Page"
+            android:layout_below="@id/buttonAddImage"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="16dp" />
+    </RelativeLayout>

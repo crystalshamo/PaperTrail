@@ -1,81 +1,74 @@
 package com.example.papertrail;
 
-import android.os.Bundle;
-
-import androidx.activity.EdgeToEdge;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
-
-import android.Manifest;
-import android.content.ContentResolver;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.util.Log;
+import android.view.MotionEvent;
+import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 
 public class EditPage extends AppCompatActivity {
 
-    private static final int PICK_IMAGE_REQUEST = 1;
-    private static final int REQUEST_PERMISSION = 2;
+    static final int PICK_IMAGE_REQUEST = 1; // For picking image from gallery
+    static final int CAMERA_REQUEST = 2;    // For taking a picture using the camera
 
-    private ImageView imageView;
-    private Button selectImageButton;
-    private Button saveImageButton;
-    private Bitmap selectedBitmap;
+    FrameLayout frameLayoutPage;
+    Button buttonAddImage;
+    ImageView imageViewPage;
+
+    private ScaleGestureDetector scaleGestureDetector;
+    private float currentScale = 1f;
+    private float initialX = 0f;
+    private float initialY = 0f;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_edit_page);  // Updated to the correct layout file
+        setContentView(R.layout.activity_edit_page);
 
-        imageView = findViewById(R.id.photoEditorImageView);
-        selectImageButton = findViewById(R.id.selectImageButton);
-        saveImageButton = findViewById(R.id.saveImageButton);
+        frameLayoutPage = findViewById(R.id.frameLayoutPage);
+        buttonAddImage = findViewById(R.id.buttonAddImage);
 
-        // Check for permissions
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_PERMISSION);
-        }
+        // Initialize ScaleGestureDetector to handle pinch to zoom
+        scaleGestureDetector = new ScaleGestureDetector(this, new ScaleListener());
 
-        // Set up button click listeners
-        selectImageButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                openGallery();
-            }
-        });
-
-        saveImageButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (selectedBitmap != null) {
-                    saveImage(selectedBitmap);
-                } else {
-                    Toast.makeText(EditPage.this, "No image to save", Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
+        buttonAddImage.setOnClickListener(v -> showImagePickerDialog());
     }
 
+    // Dialog for choosing between Camera or Gallery
+    private void showImagePickerDialog() {
+        String[] options = {"Take Photo", "Choose from Gallery"};
+        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(this);
+        builder.setItems(options, (dialog, which) -> {
+            if (which == 0) {
+                openCamera(); // Open Camera to take a photo
+            } else {
+                openGallery(); // Open Gallery to pick an image
+            }
+        });
+        builder.show();
+    }
+
+    // Open Camera to take a photo
+    private void openCamera() {
+        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        startActivityForResult(intent, CAMERA_REQUEST);
+    }
+
+    // Open Gallery to pick an image
     private void openGallery() {
-        // Open the gallery to pick an image
         Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         startActivityForResult(intent, PICK_IMAGE_REQUEST);
     }
@@ -84,40 +77,76 @@ public class EditPage extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null) {
-            try {
-                // Get the selected image URI
-                ContentResolver contentResolver = getContentResolver();
-                InputStream inputStream = contentResolver.openInputStream(data.getData());
-                selectedBitmap = BitmapFactory.decodeStream(inputStream);
-                imageView.setImageBitmap(selectedBitmap);
-            } catch (IOException e) {
-                e.printStackTrace();
-                Toast.makeText(this, "Failed to load image", Toast.LENGTH_SHORT).show();
+        if (resultCode == RESULT_OK && data != null) {
+            if (requestCode == PICK_IMAGE_REQUEST) {
+                // If the result is from the gallery
+                Uri imageUri = data.getData();
+                try {
+                    InputStream inputStream = getContentResolver().openInputStream(imageUri);
+                    Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+                    addImageToPage(bitmap);
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                    Toast.makeText(this, "Failed to load image", Toast.LENGTH_SHORT).show();
+                }
+            } else if (requestCode == CAMERA_REQUEST) {
+                // If the result is from the camera
+                Bitmap photo = (Bitmap) data.getExtras().get("data");
+                addImageToPage(photo);
             }
         }
     }
 
-    private void saveImage(Bitmap bitmap) {
-        // Save the selected image to external storage
-        File file = new File(getExternalFilesDir(null), "edited_image.png");
-        try (FileOutputStream outputStream = new FileOutputStream(file)) {
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
-            outputStream.flush();
-            Toast.makeText(this, "Image saved to " + file.getAbsolutePath(), Toast.LENGTH_SHORT).show();
-        } catch (IOException e) {
-            e.printStackTrace();
-            Toast.makeText(this, "Failed to save image", Toast.LENGTH_SHORT).show();
-        }
+    private void addImageToPage(Bitmap bitmap) {
+        // Create a new ImageView and add the image to the page
+        imageViewPage = new ImageView(this);
+        imageViewPage.setImageBitmap(bitmap);
+        imageViewPage.setLayoutParams(new FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.WRAP_CONTENT,
+                FrameLayout.LayoutParams.WRAP_CONTENT));
+
+        // Set the initial position for the image (optional)
+        imageViewPage.setX(100); // Initial X position
+        imageViewPage.setY(100); // Initial Y position
+
+        // Enable dragging and resizing
+        imageViewPage.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                scaleGestureDetector.onTouchEvent(event); // Handle pinch to zoom
+
+                switch (event.getActionMasked()) {
+                    case MotionEvent.ACTION_DOWN:
+                        initialX = event.getRawX() - v.getX();
+                        initialY = event.getRawY() - v.getY();
+                        break;
+                    case MotionEvent.ACTION_MOVE:
+                        v.setX(event.getRawX() - initialX);
+                        v.setY(event.getRawY() - initialY);
+                        break;
+                }
+                return true;
+            }
+        });
+
+        // Add the image to the FrameLayout (page)
+        frameLayoutPage.addView(imageViewPage);
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == REQUEST_PERMISSION) {
-            if (grantResults.length > 0 && grantResults[0] != android.content.pm.PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(this, "Permission denied. Cannot access gallery.", Toast.LENGTH_SHORT).show();
-            }
+    // ScaleGestureDetector listener for pinch to zoom
+    private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
+        @Override
+        public boolean onScale(ScaleGestureDetector detector) {
+            float scaleFactor = detector.getScaleFactor();
+            currentScale *= scaleFactor;
+            currentScale = Math.max(0.1f, Math.min(currentScale, 5.0f));
+
+            // Scale the image
+            imageViewPage.setScaleX(currentScale);
+            imageViewPage.setScaleY(currentScale);
+
+            return true;
         }
     }
 }
+
