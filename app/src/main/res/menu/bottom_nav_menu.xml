@@ -1,0 +1,19 @@
+<!-- res/menu/bottom_nav_menu.xml -->
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/nav_image"
+        android:icon="@drawable/ic_image"
+    android:title="Image" />
+
+    <item
+        android:id="@+id/nav_stickers"
+        android:icon="@drawable/ic_stickers"
+    android:title="Stickers" />
+
+    <item
+        android:id="@+id/nav_text"
+        android:icon="@drawable/ic_text"
+        android:title="Text" />
+
+</menu>
