@@ -33,21 +33,24 @@
     <!-- ScrollView for GridView -->
     <ScrollView
         android:id="@+id/scrollView"
-        android:layout_width="370dp"
-        android:layout_height="370dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_below="@id/addJournalButton"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="20dp">
+        android:layout_marginTop="40dp"
+        android:layout_marginBottom="40dp">
 
 
         <GridView
             android:id="@+id/gridView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:numColumns="2"
-            android:verticalSpacing="15dp"
-            android:horizontalSpacing="10dp"
-            android:stretchMode="columnWidth"/>
+            android:columnWidth="150dp"
+            android:numColumns="auto_fit"
+            android:verticalSpacing="16dp"
+            android:horizontalSpacing="16dp"
+            android:gravity="center"
+            android:stretchMode="columnWidth" />
     </ScrollView>
 
 

@@ -22,42 +22,73 @@ import java.util.List;
 public class HomeScreen extends AppCompatActivity {
     private DatabaseHelper myDbHelper;
     SQLiteDatabase db;
+    private String selectedJournal;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_screen);
 
+        ImageButton addJournalButton = findViewById(R.id.addJournalButton);
+        ImageButton deleteJournalButton = findViewById(R.id.deleteJournalButton);
+
         myDbHelper = new DatabaseHelper(this);
         try {
             myDbHelper.createDataBase();
+            myDbHelper.openDataBase(); // Open database for writing
         } catch (IOException ioe) {
-            throw new Error("Unable to create database");
+            throw new Error("Unable to create or open database");
         }
-
-        myDbHelper.openDataBase();
-        db = myDbHelper.getWritableDatabase();
-
         DatabaseHelper dbHelper = new DatabaseHelper(this);
 
-        // List of image resources for GridView (You can update this logic based on your need)
-        List<String> imageResIds = dbHelper.getImageResources();
+        // Retrieve journal names from the database
+        List<String> journalNames = dbHelper.getJournalNames();
 
+        // Set up the GridView
         GridView gridView = findViewById(R.id.gridView);
-        ImageButton addJournalButton = findViewById(R.id.addJournalButton);
+        JournalAdapter adapter = new JournalAdapter(this, journalNames);
+        gridView.setAdapter(adapter);
 
-        // Set up the adapter for the GridView
-        ImageAdapter imageAdapter = new ImageAdapter(this, imageResIds);
-        gridView.setAdapter(imageAdapter);
+        // Add click listener for grid items (optional)
+        gridView.setOnItemClickListener((parent, view, position, id) -> {
+            selectedJournal = journalNames.get(position);
+            Toast.makeText(this, "Selected: " + selectedJournal, Toast.LENGTH_SHORT).show();
+            // Add further action here, such as opening journal details
+        });
 
-        addJournalButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Show popup dialog to enter journal name
-                showAddJournalPopup();
+        addJournalButton.setOnClickListener(v -> {
+            showAddJournalPopup();
+        });
+
+        deleteJournalButton.setOnClickListener(v -> {
+            if (selectedJournal == null) {
+                Toast.makeText(HomeScreen.this, "Please select a journal to delete", Toast.LENGTH_SHORT).show();
+            } else {
+                deleteJournal(selectedJournal);
             }
         });
     }
+
+    private void deleteJournal(String selectedJournal) {
+
+        myDbHelper.deleteJournal(selectedJournal);
+
+        // Fetch the updated list of journals from the database
+        List<String> updatedJournalNames = myDbHelper.getJournalNames();
+
+        // Update the GridView's adapter
+        GridView gridView = findViewById(R.id.gridView);
+        JournalAdapter adapter = (JournalAdapter) gridView.getAdapter();
+        adapter.updateData(updatedJournalNames);
+
+        // Notify the adapter to refresh the GridView
+        adapter.notifyDataSetChanged();
+
+        // Show a confirmation toast
+        Toast.makeText(this, "Journal deleted", Toast.LENGTH_SHORT).show();
+    }
+
 
     private void showAddJournalPopup() {
         // Create a new dialog
@@ -93,11 +124,28 @@ public class HomeScreen extends AppCompatActivity {
         });
     }
 
+
+
     private void addNewJournal(String name) {
         // Insert new journal into the database
         myDbHelper.addNewJournal(name);
+
+        // Fetch the updated list of journals from the database
+        List<String> updatedJournalNames = myDbHelper.getJournalNames();
+
+        // Update the GridView's adapter
+        GridView gridView = findViewById(R.id.gridView);
+        JournalAdapter adapter = (JournalAdapter) gridView.getAdapter();
+        adapter.updateData(updatedJournalNames);
+
+        // Notify the adapter to refresh the GridView
+        adapter.notifyDataSetChanged();
+
+        // Show a confirmation toast
         Toast.makeText(this, "Journal added", Toast.LENGTH_SHORT).show();
     }
+
+
 
     // ImageAdapter class to populate GridView with images
     public class ImageAdapter extends BaseAdapter {
@@ -132,7 +180,7 @@ public class HomeScreen extends AppCompatActivity {
                 imageView = new ImageView(context);
 
                 // Calculate the dynamic size based on screen density
-                int imageSize = (int) (context.getResources().getDisplayMetrics().density * 150); // 150dp
+                int imageSize = (int) (context.getResources().getDisplayMetrics().density * 250); // 150dp
 
                 // Set dynamic size for the ImageView
                 imageView.setLayoutParams(new GridView.LayoutParams(imageSize, imageSize));
@@ -143,7 +191,7 @@ public class HomeScreen extends AppCompatActivity {
             }
 
             // Set image resource to the ImageView
-            // imageView.setImageResource(imageResIds.get(position));  // Adjust based on your logic
+            //imageView.setImageResource(imageResIds.get(position));  // Adjust based on your logic
             return imageView;
         }
     }
