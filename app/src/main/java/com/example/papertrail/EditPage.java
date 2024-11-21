@@ -47,6 +47,7 @@ public class EditPage extends AppCompatActivity {
     private float initialX = 0f;
     private float initialY = 0f;
     Bitmap bm = null;
+    Button captureButton;
 
     private BottomNavigationView bottomNavigationView;
     @Override
@@ -58,7 +59,7 @@ public class EditPage extends AppCompatActivity {
         dbHelper = new DatabaseHelper(this);
         pageNumberTv = findViewById(R.id.pageNumberTv);
         frameLayout = findViewById(R.id.frameLayoutPage);
-        Button captureButton = findViewById(R.id.buttonSavePage);
+        captureButton = findViewById(R.id.buttonSavePage);
         captureButton.setOnClickListener(v -> {
             // Get the page number from the TextView
             String pageNumberText = pageNumberTv.getText().toString();
@@ -72,6 +73,8 @@ public class EditPage extends AppCompatActivity {
 
             // Save the image to the database using the page number as ID
             dbHelper.saveImageToDatabase(pageNumber, bm);
+
+            Toast.makeText(this, "saved", Toast.LENGTH_SHORT).show();
         });
         backButton.setOnClickListener(v-> {
             Intent intent = new Intent(EditPage.this, HomeScreen.class);

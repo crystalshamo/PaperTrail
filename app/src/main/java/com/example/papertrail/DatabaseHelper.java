@@ -76,7 +76,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);  // You can use JPEG if needed
         return byteArrayOutputStream.toByteArray();
     }
-
     public Bitmap getImageFromDatabase(int pageNumber) {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.query(
@@ -89,13 +88,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 null                   // Order by (optional)
         );
 
+        Bitmap bitmap = null; // Declare a Bitmap to return
+
         if (cursor != null && cursor.moveToFirst()) {
             // Retrieve the column index safely
             int imageColumnIndex = cursor.getColumnIndex("PAGE_IMAGE");
 
             if (imageColumnIndex != -1) {
                 byte[] imageByteArray = cursor.getBlob(imageColumnIndex);
-                // Now you can work with the image byte array
+                // Convert the byte array to Bitmap
+                bitmap = BitmapFactory.decodeByteArray(imageByteArray, 0, imageByteArray.length);
             } else {
                 Log.e("DatabaseError", "PAGE_IMAGE column not found.");
             }
@@ -104,9 +106,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             Log.e("DatabaseError", "No records found in the PAGE table.");
         }
 
-        // Return null if the image wasn't found
-        return null;
+        // Return the bitmap
+        return bitmap;
     }
+
 
 
 
