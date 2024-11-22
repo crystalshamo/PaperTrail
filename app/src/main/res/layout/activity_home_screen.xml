@@ -23,8 +23,8 @@
     <ImageButton
         android:id="@+id/addJournalButton"
         android:layout_width="45dp"
-        android:layout_height="wrap_content"
-        android:background="@drawable/add_icon"
+        android:layout_height="30dp"
+        android:background="@drawable/ic_add"
         android:layout_below="@id/titleText"
         android:layout_marginTop="20dp"
         android:layout_marginBottom="20dp"
