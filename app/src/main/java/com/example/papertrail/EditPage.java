@@ -3,11 +3,14 @@ package com.example.papertrail;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
@@ -23,137 +26,144 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-
 public class EditPage extends AppCompatActivity {
-    String journalName;
+    private String journalName;
+    private String pageNumberText;
     private DatabaseHelper databaseHelper;
-    static final int PICK_IMAGE_REQUEST = 1; // For picking image from gallery
-    static final int CAMERA_REQUEST = 2;    // For taking a picture using the camera
 
+    private static final int PICK_IMAGE_REQUEST = 1;
+    private static final int CAMERA_REQUEST = 2;
 
-    FrameLayout frameLayout;
+    private FrameLayout frameLayout;
     private List<ImageView> imageViews = new ArrayList<>();
     private TextView pageNumberTv;
-    Button backButton;
+    private Button prevButton, nextButton, captureButton, addPageButton;
     private ScaleGestureDetector scaleGestureDetector;
-    private float initialX = 0f;
-    private float initialY = 0f;
-    Bitmap bm = null;
-    Button captureButton;
-
+    private float initialX = 0f, initialY = 0f;
+    private Bitmap bm = null;
     private BottomNavigationView bottomNavigationView;
-    private ImageView selectedImageView = null;  // Track the selected image
+    private ImageView selectedImageView = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_page);
 
-        Intent intent = getIntent();
-        if (intent != null && intent.hasExtra("journal_name")) {
-            journalName = intent.getStringExtra("journal_name");
-        } else {
-            // Handle the case where the Intent is missing or extra is not found
+        journalName = getIntent().getStringExtra("journal_name");
+        if (journalName == null) {
             Toast.makeText(this, "No journal selected", Toast.LENGTH_SHORT).show();
-            finish(); // Close the activity if no journal is selected
+            finish();
             return;
         }
 
         databaseHelper = new DatabaseHelper(this);
         try {
             databaseHelper.createDataBase();
-            databaseHelper.openDataBase(); // Open database for writing
+            databaseHelper.openDataBase();
         } catch (IOException ioe) {
             throw new Error("Unable to create or open database");
         }
-        backButton = findViewById(R.id.buttonPrev);
+
+        initializeViews();
+        setupBottomNavigation();
+        loadPage();
+        loadArrows();
+
+        pageNumberTv.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int start, int before, int after) {
+                loadPage();
+                loadArrows();
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {}
+        });
+    }
+
+    private void initializeViews() {
+        prevButton = findViewById(R.id.buttonPrev);
+        nextButton = findViewById(R.id.buttonNext);
         pageNumberTv = findViewById(R.id.pageNumberTv);
         frameLayout = findViewById(R.id.pageLayout);
         captureButton = findViewById(R.id.buttonSavePage);
-        captureButton.setOnClickListener(v -> {
-            // Get the page number from the TextView
-            String pageNumberText = pageNumberTv.getText().toString();
-            int pageNumber = Integer.parseInt(pageNumberText);  // Convert it to an integer
+        addPageButton = findViewById(R.id.buttonAddPage);
 
-            // Capture the FrameLayout as Bitmap using Bitmap.createBitmap()
-            frameLayout.setDrawingCacheEnabled(false);  // Disable it to save memory
-            frameLayout.buildDrawingCache();
-            bm = Bitmap.createBitmap(frameLayout.getDrawingCache());  // Create Bitmap from the cache
-            frameLayout.setDrawingCacheEnabled(false);  // Clean up
+        prevButton.setOnClickListener(v -> decrementPage());
+        nextButton.setOnClickListener(v -> incrementPage());
+        addPageButton.setOnClickListener(v -> incrementPage());
+        captureButton.setOnClickListener(v -> savePage());
 
-            databaseHelper.saveImageToPageTable(journalName,pageNumber,bm);
-            Toast.makeText(this, "saved", Toast.LENGTH_SHORT).show();
-        });
-
-        // Initialize ScaleGestureDetector to handle pinch to zoom
         scaleGestureDetector = new ScaleGestureDetector(this, new ScaleListener());
+    }
 
+    private void setupBottomNavigation() {
         bottomNavigationView = findViewById(R.id.bottom_navigation);
-
-        // Add items to BottomNavigationView dynamically
         bottomNavigationView.getMenu().add(0, 1, 0, "Image").setIcon(R.drawable.ic_image);
         bottomNavigationView.getMenu().add(0, 2, 1, "Text").setIcon(R.drawable.ic_text);
         bottomNavigationView.getMenu().add(0, 3, 2, "Stickers").setIcon(R.drawable.ic_stickers);
 
-        // Handle navigation item selections
         bottomNavigationView.setOnNavigationItemSelectedListener(item -> {
             switch (item.getItemId()) {
-                case 1:
-                    showImagePickerDialog();
-                    break;
-                case 2:
-                    // Handle Text selection
-                    break;
-                case 3:
-                    // Handle Stickers selection
-                    break;
+                case 1: showImagePickerDialog(); break;
+                case 2: // Handle Text selection break;
+                case 3: // Handle Stickers selection break;
             }
             return true;
         });
-        //checkForFirstPage();
-      loadPage();
     }
 
-
-
-    public void loadPage() {
-        String pageNumberText = pageNumberTv.getText().toString();
+    private void loadPage() {
+        pageNumberText = pageNumberTv.getText().toString();
         int pageNumber = Integer.parseInt(pageNumberText);
-        if (databaseHelper.isPageExist(pageNumber,journalName)) {
-            Bitmap bitmap = databaseHelper.getPageImageFromDatabase(journalName,pageNumber);
+        frameLayout.removeAllViews();
+        if (databaseHelper.isPageExist(pageNumber, journalName)) {
+            Bitmap bitmap = databaseHelper.getPageImageFromDatabase(journalName, pageNumber);
             if (bitmap != null) {
-                // Convert the Bitmap to a Drawable
                 Drawable drawable = new BitmapDrawable(getResources(), bitmap);
-
-
-                // Set the background of the FrameLayout to the Drawable
                 frameLayout.setBackground(drawable);
             }
+        } else {
+            frameLayout.setBackgroundColor(Color.WHITE);
         }
     }
 
+    private void loadArrows() {
+        pageNumberText = pageNumberTv.getText().toString();
+        int pageNumber = Integer.parseInt(pageNumberText);
 
-    // Dialog for choosing between Camera or Gallery
-    private void showImagePickerDialog() {
-        String[] options = {"Take Photo", "Choose from Gallery"};
-        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(this);
-        builder.setItems(options, (dialog, which) -> {
-            if (which == 0) {
-                openCamera(); // Open Camera to take a photo
-            } else {
-                openGallery(); // Open Gallery to pick an image
-            }
-        });
-        builder.show();
+        if (databaseHelper.hasPagesGreaterThan(pageNumber, journalName)) {
+            nextButton.setVisibility(View.VISIBLE);
+            addPageButton.setVisibility(View.INVISIBLE);
+        } else {
+            nextButton.setVisibility(View.INVISIBLE);
+            addPageButton.setVisibility(View.VISIBLE);
+        }
+
+        if (databaseHelper.hasPagesLessThan(pageNumber,journalName)) {
+            prevButton.setVisibility(View.VISIBLE);
+        } else {
+            prevButton.setVisibility(View.INVISIBLE);
+        }
     }
 
-    // Open Camera to take a photo
+    private void showImagePickerDialog() {
+        String[] options = {"Take Photo", "Choose from Gallery"};
+        new android.app.AlertDialog.Builder(this)
+                .setItems(options, (dialog, which) -> {
+                    if (which == 0) openCamera();
+                    else openGallery();
+                }).show();
+    }
+
     private void openCamera() {
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         startActivityForResult(intent, CAMERA_REQUEST);
     }
 
-    // Open Gallery to pick an image
     private void openGallery() {
         Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         startActivityForResult(intent, PICK_IMAGE_REQUEST);
@@ -165,7 +175,6 @@ public class EditPage extends AppCompatActivity {
 
         if (resultCode == RESULT_OK && data != null) {
             if (requestCode == PICK_IMAGE_REQUEST) {
-                // If the result is from the gallery
                 Uri imageUri = data.getData();
                 try {
                     InputStream inputStream = getContentResolver().openInputStream(imageUri);
@@ -184,60 +193,66 @@ public class EditPage extends AppCompatActivity {
     }
 
     private void addImageToPage(Bitmap bitmap) {
-        // Create a new ImageView and add the image to the page
         ImageView imageViewPage = new ImageView(this);
         imageViewPage.setImageBitmap(bitmap);
-        imageViewPage.setLayoutParams(new FrameLayout.LayoutParams(
-                FrameLayout.LayoutParams.WRAP_CONTENT,
-                FrameLayout.LayoutParams.WRAP_CONTENT));
-
-        // Set the initial position for the image (optional)
+        imageViewPage.setLayoutParams(new FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT));
         imageViewPage.setX(100); // Initial X position
         imageViewPage.setY(100); // Initial Y position
 
-        // Enable dragging and resizing
-        imageViewPage.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                scaleGestureDetector.onTouchEvent(event); // Handle pinch to zoom
-
-                switch (event.getActionMasked()) {
-                    case MotionEvent.ACTION_DOWN:
-                        initialX = event.getRawX() - v.getX();
-                        initialY = event.getRawY() - v.getY();
-                        selectedImageView = (ImageView) v; // Track the selected image for scaling
-                        break;
-                    case MotionEvent.ACTION_MOVE:
-                        v.setX(event.getRawX() - initialX);
-                        v.setY(event.getRawY() - initialY);
-                        break;
-                }
-                return true;
+        imageViewPage.setOnTouchListener((v, event) -> {
+            scaleGestureDetector.onTouchEvent(event);
+            switch (event.getActionMasked()) {
+                case MotionEvent.ACTION_DOWN:
+                    initialX = event.getRawX() - v.getX();
+                    initialY = event.getRawY() - v.getY();
+                    selectedImageView = (ImageView) v;
+                    break;
+                case MotionEvent.ACTION_MOVE:
+                    v.setX(event.getRawX() - initialX);
+                    v.setY(event.getRawY() - initialY);
+                    break;
             }
+            return true;
         });
 
-        // Add the image to the FrameLayout (page)
         frameLayout.addView(imageViewPage);
-        imageViews.add(imageViewPage);  // Store the reference to this image
+        imageViews.add(imageViewPage);
+    }
+
+    private void savePage() {
+        pageNumberText = pageNumberTv.getText().toString();
+        int pageNumber = Integer.parseInt(pageNumberText);
+
+        frameLayout.setDrawingCacheEnabled(false);
+        frameLayout.buildDrawingCache();
+        bm = Bitmap.createBitmap(frameLayout.getDrawingCache());
+        frameLayout.setDrawingCacheEnabled(false);
+
+        databaseHelper.saveImageToPageTable(journalName, pageNumber, bm);
+        Toast.makeText(this, "Saved", Toast.LENGTH_SHORT).show();
+    }
+
+    private void decrementPage() {
+        pageNumberText = pageNumberTv.getText().toString();
+        int pageNumber = Integer.parseInt(pageNumberText);
+        pageNumberTv.setText(String.valueOf(pageNumber - 1));
+    }
+
+    private void incrementPage() {
+        pageNumberText = pageNumberTv.getText().toString();
+        int pageNumber = Integer.parseInt(pageNumberText);
+        pageNumberTv.setText(String.valueOf(pageNumber + 1));
     }
 
     private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
         @Override
         public boolean onScale(ScaleGestureDetector detector) {
             if (selectedImageView != null) {
-                // Get the scale factor
                 float scaleFactor = detector.getScaleFactor();
-                float currentScaleX = selectedImageView.getScaleX();
-                float currentScaleY = selectedImageView.getScaleY();
-
-                // Apply scaling only to the selected image
-                selectedImageView.setScaleX(currentScaleX * scaleFactor);
-                selectedImageView.setScaleY(currentScaleY * scaleFactor);
+                selectedImageView.setScaleX(selectedImageView.getScaleX() * scaleFactor);
+                selectedImageView.setScaleY(selectedImageView.getScaleY() * scaleFactor);
             }
-
             return true;
         }
     }
 }
-
-
