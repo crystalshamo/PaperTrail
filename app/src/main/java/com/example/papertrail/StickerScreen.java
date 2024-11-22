@@ -110,7 +110,7 @@ public class StickerScreen extends AppCompatActivity {
 
                 // Add the image resource to the list
                 HashMap<String, Object> map = new HashMap<>();
-                map.put("image", imageId != 0 ? imageId : R.drawable.draw); // Fallback to default image
+                map.put("image", imageId != 0 ? imageId : R.drawable.s14); // Fallback to default image
                 imageDataList.add(map);
             } while (result.moveToNext());
         } else {
