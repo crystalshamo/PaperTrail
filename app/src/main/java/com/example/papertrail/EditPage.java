@@ -25,9 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class EditPage extends AppCompatActivity {
-
-    Intent intent = getIntent();  // Get the incoming Intent
-    String journalName = intent.getStringExtra("journal_name");
+    String journalName;
     private DatabaseHelper databaseHelper;
     static final int PICK_IMAGE_REQUEST = 1; // For picking image from gallery
     static final int CAMERA_REQUEST = 2;    // For taking a picture using the camera
@@ -50,6 +48,16 @@ public class EditPage extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_page);
+
+        Intent intent = getIntent();
+        if (intent != null && intent.hasExtra("journal_name")) {
+            journalName = intent.getStringExtra("journal_name");
+        } else {
+            // Handle the case where the Intent is missing or extra is not found
+            Toast.makeText(this, "No journal selected", Toast.LENGTH_SHORT).show();
+            finish(); // Close the activity if no journal is selected
+            return;
+        }
 
         databaseHelper = new DatabaseHelper(this);
         try {
@@ -75,12 +83,6 @@ public class EditPage extends AppCompatActivity {
 
             databaseHelper.saveImageToPageTable(journalName,pageNumber,bm);
             Toast.makeText(this, "saved", Toast.LENGTH_SHORT).show();
-        });
-
-        backButton.setOnClickListener(v -> {
-            Intent intent = new Intent(EditPage.this, HomeScreen.class);
-            // Start the new activity
-            startActivity(intent);
         });
 
         // Initialize ScaleGestureDetector to handle pinch to zoom

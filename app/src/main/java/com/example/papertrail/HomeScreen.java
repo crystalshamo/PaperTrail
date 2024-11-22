@@ -85,18 +85,6 @@ public class HomeScreen extends AppCompatActivity {
                 editJournal(selectedJournal);
             }
         });
-
-
-        goToEdit = findViewById(R.id.goToEdit);
-        goToEdit.setOnClickListener(v -> {
-            if (selectedJournal == null) {
-                Toast.makeText(HomeScreen.this, "Please select a journal to edit", Toast.LENGTH_SHORT).show();
-            } else {
-                Intent intent = new Intent(HomeScreen.this, EditPage.class);
-                intent.putExtra("journal_name", selectedJournal);  // Pass selected journal
-                startActivity(intent);
-            }
-        });
     }
 
 
@@ -138,9 +126,6 @@ public class HomeScreen extends AppCompatActivity {
         intent.putExtra("journal_name", selectedJournal);
         startActivity(intent);
     }
-
-
-
 
     private void showAddJournalPopup() {
         // Create a new dialog

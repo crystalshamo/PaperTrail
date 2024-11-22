@@ -22,7 +22,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
 
     private static String DB_PATH = "/data/data/com.example.papertrail/databases/"; // Make sure this path matches your app's package name
-    private static String DB_NAME = "sampleDatabase2";
+    private static String DB_NAME = "database5";
     private SQLiteDatabase db;
     private Context myContext;
     private static String JOURNAL_TABLE_NAME = "JournalTable";
@@ -118,13 +118,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
-        // Create the JournalTable if it doesn't exist
-        String CREATE_JOURNAL_TABLE = "CREATE TABLE IF NOT EXISTS JournalTable (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT)";
-        db.execSQL(CREATE_JOURNAL_TABLE);
-
-
-        String CREATE_PAGE_TABLE = "CREATE TABLE IF NOT EXISTS PageTable (id INTEGER PRIMARY KEY AUTOINCREMENT, page_number INTEGER, background_image BLOB, journal_id INTEGER)";
-        db.execSQL(CREATE_PAGE_TABLE);
     }
 
 
