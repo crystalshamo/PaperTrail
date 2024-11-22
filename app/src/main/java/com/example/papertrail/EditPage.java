@@ -1,5 +1,6 @@
 package com.example.papertrail;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -43,6 +44,7 @@ public class EditPage extends AppCompatActivity {
     private Bitmap bm = null;
     private BottomNavigationView bottomNavigationView;
     private ImageView selectedImageView = null;
+    Intent stickerIntent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -110,7 +112,9 @@ public class EditPage extends AppCompatActivity {
             switch (item.getItemId()) {
                 case 1: showImagePickerDialog(); break;
                 case 2: // Handle Text selection break;
-                case 3: // Handle Stickers selection break;
+                case 3: stickerIntent = new Intent(EditPage.this, StickerScreen.class);
+                startActivity(stickerIntent);
+                break;
             }
             return true;
         });
@@ -192,6 +196,7 @@ public class EditPage extends AppCompatActivity {
         }
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private void addImageToPage(Bitmap bitmap) {
         ImageView imageViewPage = new ImageView(this);
         imageViewPage.setImageBitmap(bitmap);
