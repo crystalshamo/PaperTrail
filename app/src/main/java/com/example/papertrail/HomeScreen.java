@@ -23,7 +23,6 @@ import java.util.List;
 
 public class HomeScreen extends AppCompatActivity {
     private DatabaseHelper myDbHelper;
-    SQLiteDatabase db;
     private String selectedJournal;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
