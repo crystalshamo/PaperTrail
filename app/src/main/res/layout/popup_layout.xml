@@ -1,0 +1,99 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:id="@+id/popup_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:background="@android:color/white">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Select Category"
+            android:textSize="18sp"
+            android:paddingBottom="8dp" />
+
+        <RadioGroup
+            android:id="@+id/radio_group"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <RadioButton
+                android:id="@+id/radio_all"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="All Categories" />
+
+            <RadioButton
+                android:id="@+id/radio_glam"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Glam" />
+
+            <RadioButton
+                android:id="@+id/radio_food"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Food" />
+
+            <RadioButton
+                android:id="@+id/radio_winter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Winter" />
+
+            <RadioButton
+                android:id="@+id/radio_spring"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Spring" />
+
+            <RadioButton
+                android:id="@+id/radio_fall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Fall" />
+
+            <RadioButton
+                android:id="@+id/radio_summer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Summer" />
+
+            <RadioButton
+                android:id="@+id/radio_celebrations"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Celebrations" />
+
+            <RadioButton
+                android:id="@+id/radio_phrases"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Phrases" />
+
+            <RadioButton
+                android:id="@+id/radio_nature"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Nature" />
+
+            <RadioButton
+                android:id="@+id/radio_other"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Other" />
+
+        </RadioGroup>
+
+        <Button
+            android:id="@+id/popup_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Apply" />
+    </LinearLayout>
+</ScrollView>

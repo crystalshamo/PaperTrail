@@ -111,7 +111,8 @@ public class EditPage extends AppCompatActivity {
         bottomNavigationView.setOnNavigationItemSelectedListener(item -> {
             switch (item.getItemId()) {
                 case 1: showImagePickerDialog(); break;
-                case 2: // Handle Text selection break;
+                case 2: // Handle Text selection
+                     break;
                 case 3: stickerIntent = new Intent(EditPage.this, StickerScreen.class);
                 startActivity(stickerIntent);
                 break;
