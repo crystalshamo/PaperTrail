@@ -317,5 +317,40 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         return false;
     }
+    public void deletePage(int pageNumber, String journalName) {
+        int journalId = getJournalIdByName(journalName);
+        boolean hasSubsequentPages = hasPagesGreaterThan(pageNumber, journalName);
+
+        if (journalId == -1) {
+            return;  // Invalid journal
+        }
+
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        int rowsDeleted = db.delete(
+                "PageTable",
+                "journal_id = ? AND page_number = ?",
+                new String[]{String.valueOf(journalId), String.valueOf(pageNumber)}
+        );
+
+        if (hasSubsequentPages) {
+            decrementPageNumbers(pageNumber+1, journalId);
+        }
+
+        db.close();
+    }
+
+    public void decrementPageNumbers(int pageNumber, int journalId) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        String updateQuery = "UPDATE PageTable SET page_number = page_number - 1 " +
+                "WHERE journal_id = ? AND page_number >= ?";
+
+        db.execSQL(updateQuery, new String[]{String.valueOf(journalId), String.valueOf(pageNumber)});
+
+        db.close();
+    }
+
+
+
 }
 

@@ -4,14 +4,14 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.text.Editable;
-import android.text.TextWatcher;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
@@ -21,6 +21,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -29,8 +31,9 @@ import java.util.ArrayList;
 import java.util.List;
 public class EditPage extends AppCompatActivity {
     private String journalName;
-    private String pageNumberText;
     private DatabaseHelper databaseHelper;
+    private EditPageViewModel viewModel;
+    private ImageView selectedImageView = null;
 
     private static final int PICK_IMAGE_REQUEST = 1;
     private static final int CAMERA_REQUEST = 2;
@@ -38,18 +41,17 @@ public class EditPage extends AppCompatActivity {
     private FrameLayout frameLayout;
     private List<ImageView> imageViews = new ArrayList<>();
     private TextView pageNumberTv;
-    private Button prevButton, nextButton, captureButton, addPageButton;
+    private Button prevButton, captureButton, nextButton, addPageButton, deletePageButton;
     private ScaleGestureDetector scaleGestureDetector;
     private float initialX = 0f, initialY = 0f;
-    private Bitmap bm = null;
     private BottomNavigationView bottomNavigationView;
-    private ImageView selectedImageView = null;
     Intent stickerIntent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_page);
+        viewModel = new ViewModelProvider(this).get(EditPageViewModel.class);
 
         journalName = getIntent().getStringExtra("journal_name");
         if (journalName == null) {
@@ -68,36 +70,33 @@ public class EditPage extends AppCompatActivity {
 
         initializeViews();
         setupBottomNavigation();
-        loadPage();
-        loadArrows();
 
-        pageNumberTv.addTextChangedListener(new TextWatcher() {
+        viewModel.getCurrentPage().observe(this, new Observer<Integer>() {
             @Override
-            public void beforeTextChanged(CharSequence charSequence, int start, int count, int after) {}
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int start, int before, int after) {
-                loadPage();
-                loadArrows();
+            public void onChanged(Integer pageNumber) {
+                // Update UI when page number changes
+                pageNumberTv.setText(String.valueOf(pageNumber));
+                loadPage(pageNumber);
+                loadArrows(pageNumber);
             }
-
-            @Override
-            public void afterTextChanged(Editable editable) {}
         });
     }
 
     private void initializeViews() {
         prevButton = findViewById(R.id.buttonPrev);
         nextButton = findViewById(R.id.buttonNext);
-        pageNumberTv = findViewById(R.id.pageNumberTv);
         frameLayout = findViewById(R.id.pageLayout);
         captureButton = findViewById(R.id.buttonSavePage);
         addPageButton = findViewById(R.id.buttonAddPage);
+        pageNumberTv = findViewById(R.id.pageNumberTv);
+        deletePageButton = findViewById(R.id.buttonDeletePage);
 
         prevButton.setOnClickListener(v -> decrementPage());
         nextButton.setOnClickListener(v -> incrementPage());
         addPageButton.setOnClickListener(v -> incrementPage());
         captureButton.setOnClickListener(v -> savePage());
+        deletePageButton.setOnClickListener(v -> deletePage());
+
 
         scaleGestureDetector = new ScaleGestureDetector(this, new ScaleListener());
     }
@@ -121,10 +120,10 @@ public class EditPage extends AppCompatActivity {
         });
     }
 
-    private void loadPage() {
-        pageNumberText = pageNumberTv.getText().toString();
-        int pageNumber = Integer.parseInt(pageNumberText);
+    private void loadPage(int pageNumber) {
+        Log.d("EditPage", "Loading page: " + pageNumber);
         frameLayout.removeAllViews();
+
         if (databaseHelper.isPageExist(pageNumber, journalName)) {
             Bitmap bitmap = databaseHelper.getPageImageFromDatabase(journalName, pageNumber);
             if (bitmap != null) {
@@ -136,10 +135,7 @@ public class EditPage extends AppCompatActivity {
         }
     }
 
-    private void loadArrows() {
-        pageNumberText = pageNumberTv.getText().toString();
-        int pageNumber = Integer.parseInt(pageNumberText);
-
+    private void loadArrows(int pageNumber) {
         if (databaseHelper.hasPagesGreaterThan(pageNumber, journalName)) {
             nextButton.setVisibility(View.VISIBLE);
             addPageButton.setVisibility(View.INVISIBLE);
@@ -225,30 +221,6 @@ public class EditPage extends AppCompatActivity {
         imageViews.add(imageViewPage);
     }
 
-    private void savePage() {
-        pageNumberText = pageNumberTv.getText().toString();
-        int pageNumber = Integer.parseInt(pageNumberText);
-
-        frameLayout.setDrawingCacheEnabled(false);
-        frameLayout.buildDrawingCache();
-        bm = Bitmap.createBitmap(frameLayout.getDrawingCache());
-        frameLayout.setDrawingCacheEnabled(false);
-
-        databaseHelper.saveImageToPageTable(journalName, pageNumber, bm);
-        Toast.makeText(this, "Saved", Toast.LENGTH_SHORT).show();
-    }
-
-    private void decrementPage() {
-        pageNumberText = pageNumberTv.getText().toString();
-        int pageNumber = Integer.parseInt(pageNumberText);
-        pageNumberTv.setText(String.valueOf(pageNumber - 1));
-    }
-
-    private void incrementPage() {
-        pageNumberText = pageNumberTv.getText().toString();
-        int pageNumber = Integer.parseInt(pageNumberText);
-        pageNumberTv.setText(String.valueOf(pageNumber + 1));
-    }
 
     private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
         @Override
@@ -261,4 +233,49 @@ public class EditPage extends AppCompatActivity {
             return true;
         }
     }
+
+
+    private void decrementPage() {
+        viewModel.decrementPage();
+    }
+
+
+    private void incrementPage() {
+        viewModel.incrementPage();
+    }
+
+    private void savePage() {
+        Integer pageNumber = viewModel.getCurrentPage().getValue();
+
+        if (pageNumber == null) {
+            Toast.makeText(this, "Invalid page number", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        Bitmap bm = Bitmap.createBitmap(frameLayout.getWidth(), frameLayout.getHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bm);
+        frameLayout.draw(canvas);
+
+        databaseHelper.saveImageToPageTable(journalName, pageNumber, bm);
+        Toast.makeText(this, "Saved", Toast.LENGTH_SHORT).show();
+    }
+
+    private void deletePage() {
+        Integer pageNumber = viewModel.getCurrentPage().getValue();
+        if (pageNumber==1 && !databaseHelper.hasPagesGreaterThan(pageNumber, journalName)) {
+            databaseHelper.deletePage(pageNumber, journalName);
+            databaseHelper.deleteJournal(journalName);
+            Intent intent = new Intent(EditPage.this, HomeScreen.class);
+            startActivity(intent);
+        } else if (pageNumber==1) {
+            databaseHelper.deletePage(pageNumber, journalName);
+            loadPage(pageNumber);
+        } else {
+            databaseHelper.deletePage(pageNumber, journalName);
+            decrementPage();
+        }
+    }
+
 }
+
+
