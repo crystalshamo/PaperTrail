@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -24,6 +26,7 @@ import java.util.List;
 public class HomeScreen extends AppCompatActivity {
     private DatabaseHelper myDbHelper;
     private String selectedJournal;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -32,7 +35,6 @@ public class HomeScreen extends AppCompatActivity {
 
         ImageButton addJournalButton = findViewById(R.id.addJournalButton);
         ImageButton deleteJournalButton = findViewById(R.id.deleteJournalButton);
-        ImageButton editJournalButton = findViewById(R.id.editJournalButton);
 
 
         myDbHelper = new DatabaseHelper(this);
@@ -53,12 +55,25 @@ public class HomeScreen extends AppCompatActivity {
         JournalAdapter adapter = new JournalAdapter(this, journalNames);
         gridView.setAdapter(adapter);
 
+        //double click
+        GestureDetector gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
+            @Override
+            public boolean onDoubleTap(MotionEvent e) {
+                // Determine which item was double-tapped
+                int position = gridView.pointToPosition((int) e.getX(), (int) e.getY());
+                if (position != GridView.INVALID_POSITION) {
+                    String selectedJournal = journalNames.get(position);
+                    editJournal(selectedJournal);
+                }
+                return true;
+            }
+        });
 
-        // Add click listener for grid items (optional)
+        gridView.setOnTouchListener((v, event) -> gestureDetector.onTouchEvent(event));
+
         gridView.setOnItemClickListener((parent, view, position, id) -> {
             selectedJournal = journalNames.get(position);
             Toast.makeText(this, "Selected: " + selectedJournal, Toast.LENGTH_SHORT).show();
-            // Add further action here, such as opening journal details
         });
 
 
@@ -76,23 +91,7 @@ public class HomeScreen extends AppCompatActivity {
         });
 
 
-        editJournalButton.setOnClickListener(v -> {
-            if (selectedJournal == null) {
-                Toast.makeText(HomeScreen.this, "Please select a journal to edit", Toast.LENGTH_SHORT).show();
-            } else {
-                editJournal(selectedJournal);
-            }
-        });
     }
-
-
-
-
-
-
-
-
-
 
     private void deleteJournal(String selectedJournal) {
 
@@ -165,10 +164,6 @@ public class HomeScreen extends AppCompatActivity {
     }
 
 
-
-
-
-
     private void addNewJournal(String name) {
         // Insert new journal into the database
         myDbHelper.addNewJournal(name);
@@ -191,10 +186,6 @@ public class HomeScreen extends AppCompatActivity {
         // Show a confirmation toast
         Toast.makeText(this, "Journal added", Toast.LENGTH_SHORT).show();
     }
-
-
-
-
 
 
     // ImageAdapter class to populate GridView with images
@@ -254,4 +245,5 @@ public class HomeScreen extends AppCompatActivity {
         }
 
 
-    }}
+    }
+}
