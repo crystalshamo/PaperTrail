@@ -2,7 +2,6 @@ package com.example.papertrail;
 
 import android.content.Context;
 import android.content.Intent;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,6 +29,7 @@ public class HomeScreen extends AppCompatActivity {
         setContentView(R.layout.activity_home_screen);
 
 
+        Button viewJournalButton = findViewById(R.id.viewJournalButton);
         ImageButton addJournalButton = findViewById(R.id.addJournalButton);
         ImageButton deleteJournalButton = findViewById(R.id.deleteJournalButton);
         ImageButton editJournalButton = findViewById(R.id.editJournalButton);
@@ -82,6 +82,11 @@ public class HomeScreen extends AppCompatActivity {
             } else {
                 editJournal(selectedJournal);
             }
+        });
+
+        viewJournalButton.setOnClickListener(v-> {
+            Intent intent = new Intent(HomeScreen.this, ViewJournal.class);
+            startActivity(intent);
         });
     }
 
