@@ -350,6 +350,47 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.close();
     }
 
+    public List<Bitmap> getAllPagesAsBitmaps(String journalName) {
+        List<Bitmap> bitmaps = new ArrayList<>();
+
+        // Get the journal ID by name
+        int journalId = getJournalIdByName(journalName);
+
+        if (journalId == -1) {
+            return bitmaps;  // Return empty list if the journal doesn't exist
+        }
+
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        // Query the PageTable to get all pages for the given journalId
+        Cursor cursor = db.query(
+                PAGE_TABLE,
+                new String[]{COLUMN_PAGE_NUMBER, COLUMN_BACKGROUND_IMAGE},
+                "journal_id = ?",  // Filter by journal_id
+                new String[]{String.valueOf(journalId)},
+                null, null, // No grouping or ordering
+                null
+        );
+
+        if (cursor != null && cursor.moveToFirst()) {
+            do {
+                @SuppressLint("Range") int pageNumber = cursor.getInt(cursor.getColumnIndex(COLUMN_PAGE_NUMBER));
+                @SuppressLint("Range") byte[] imageByteArray = cursor.getBlob(cursor.getColumnIndex(COLUMN_BACKGROUND_IMAGE));
+                // Convert the byte array to a Bitmap
+                Bitmap bitmap = BitmapFactory.decodeByteArray(imageByteArray, 0, imageByteArray.length);
+
+                // Add the bitmap to the list
+                bitmaps.add(bitmap);
+            } while (cursor.moveToNext());
+            cursor.close();
+        }
+
+        db.close();
+
+        return bitmaps;  // Return the list of bitmaps
+    }
+
+
 
 
 }

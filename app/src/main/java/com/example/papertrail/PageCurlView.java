@@ -220,23 +220,19 @@ public class PageCurlView extends View {
      *
      * @param pages
      */
-    public void setCurlView(List<Integer> pages){
-
-        // LEGACY PAGE HANDLING!
-
+    public void setCurlView(List<Bitmap> pages){
         // Create pages
-
         mPages = new ArrayList<Bitmap>();
 
-        for(int image =0; image < pages.size(); image++){
-
-            mPages.add(BitmapFactory.decodeResource(getResources(), pages.get(image)));
+        for (int image = 0; image < pages.size(); image++) {
+            mPages.add(pages.get(image));  // Directly use the Bitmap objects
         }
 
         // Create some sample images
-        mForeground = mPages.get(0);
-        mBackground = mPages.get(1);
-
+        if (!mPages.isEmpty()) {
+            mForeground = mPages.get(0);
+            mBackground = mPages.get(1);
+        }
     }
 
     /**
