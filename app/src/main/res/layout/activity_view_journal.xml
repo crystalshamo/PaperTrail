@@ -8,6 +8,7 @@
     tools:context=".ViewJournal">
 
     <com.example.papertrail.PageCurlView
+        android:id="@+id/curlview"
         android:layout_width="match_parent"
         android:layout_height="600dp"
         app:layout_constraintBottom_toBottomOf="parent"
