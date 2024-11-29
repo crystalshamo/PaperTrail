@@ -1,6 +1,7 @@
 package com.example.papertrail;
 
 import android.os.Bundle;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -13,6 +14,7 @@ import java.io.IOException;
 public class ViewJournal extends AppCompatActivity {
     PageCurlView curlview;
     DatabaseHelper dbhelper;
+    String journalName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,7 +34,15 @@ public class ViewJournal extends AppCompatActivity {
         } catch (IOException ioe) {
             throw new Error("Unable to create or open database");
         }
+
+        journalName = getIntent().getStringExtra("journal_name");
+        if (journalName == null) {
+            Toast.makeText(this, "No journal selected", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
+
         curlview = findViewById(R.id.curlview);
-        curlview.setCurlView(dbhelper.getAllPagesAsBitmaps("f"));
+        curlview.setCurlView(dbhelper.getAllPagesAsBitmaps(journalName));
     }
 }
