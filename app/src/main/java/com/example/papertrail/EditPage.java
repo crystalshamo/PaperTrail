@@ -113,9 +113,10 @@ public class EditPage extends AppCompatActivity {
                 case 1: showImagePickerDialog(); break;
                 case 2: // Handle Text selection
                      break;
-                case 3: stickerIntent = new Intent(EditPage.this, StickerScreen.class);
-                startActivity(stickerIntent);
-                break;
+                case 3:
+                    stickerIntent = new Intent(EditPage.this, StickerScreen.class);
+                    startActivityForResult(stickerIntent, 1001); // Request code for stickers
+                    break;
             }
             return true;
         });
@@ -179,7 +180,12 @@ public class EditPage extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (resultCode == RESULT_OK && data != null) {
-            if (requestCode == PICK_IMAGE_REQUEST) {
+            if (requestCode == 1001) { // Sticker request code
+                int stickerResId = data.getIntExtra("selected_sticker", -1);
+                if (stickerResId != -1) {
+                    addStickerToPage(stickerResId);
+                }
+            } else if (requestCode == PICK_IMAGE_REQUEST) {
                 Uri imageUri = data.getData();
                 try {
                     InputStream inputStream = getContentResolver().openInputStream(imageUri);
@@ -190,12 +196,42 @@ public class EditPage extends AppCompatActivity {
                     Toast.makeText(this, "Failed to load image", Toast.LENGTH_SHORT).show();
                 }
             } else if (requestCode == CAMERA_REQUEST) {
-                // If the result is from the camera
                 Bitmap photo = (Bitmap) data.getExtras().get("data");
                 addImageToPage(photo);
             }
         }
     }
+
+    private void addStickerToPage(int stickerResId) {
+        ImageView stickerView = new ImageView(this);
+        stickerView.setImageResource(stickerResId);
+        stickerView.setLayoutParams(new FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.WRAP_CONTENT,
+                FrameLayout.LayoutParams.WRAP_CONTENT));
+        stickerView.setX(100); // Initial position
+        stickerView.setY(100);
+
+        stickerView.setOnTouchListener((v, event) -> {
+            scaleGestureDetector.onTouchEvent(event);
+            switch (event.getActionMasked()) {
+                case MotionEvent.ACTION_DOWN:
+                    initialX = event.getRawX() - v.getX();
+                    initialY = event.getRawY() - v.getY();
+                    selectedImageView = (ImageView) v;
+                    break;
+                case MotionEvent.ACTION_MOVE:
+                    v.setX(event.getRawX() - initialX);
+                    v.setY(event.getRawY() - initialY);
+                    break;
+            }
+            return true;
+        });
+
+        frameLayout.addView(stickerView);
+        imageViews.add(stickerView); // Keep track for saving
+    }
+
+
 
     @SuppressLint("ClickableViewAccessibility")
     private void addImageToPage(Bitmap bitmap) {

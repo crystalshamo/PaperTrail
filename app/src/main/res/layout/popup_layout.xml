@@ -26,67 +26,89 @@
                 android:id="@+id/radio_all"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="All Categories" />
+                android:text="All Categories"
+                android:background="@null"
+                 />
 
             <RadioButton
                 android:id="@+id/radio_glam"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Glam" />
+                android:text="Glam"
+                android:background="@null"
+           />
 
             <RadioButton
                 android:id="@+id/radio_food"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Food" />
+                android:text="Food"
+                android:background="@null"
+              />
 
             <RadioButton
                 android:id="@+id/radio_winter"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Winter" />
+                android:text="Winter"
+                android:background="@null"
+                />
 
             <RadioButton
                 android:id="@+id/radio_spring"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Spring" />
+                android:text="Spring"
+                android:background="@null"
+                 />
 
             <RadioButton
                 android:id="@+id/radio_fall"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Fall" />
+                android:text="Fall"
+                android:background="@null"
+      />
 
             <RadioButton
                 android:id="@+id/radio_summer"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Summer" />
+                android:text="Summer"
+                android:background="@null"
+                />
 
             <RadioButton
                 android:id="@+id/radio_celebrations"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Celebrations" />
+                android:text="Celebrations"
+                android:background="@null"
+                 />
 
             <RadioButton
                 android:id="@+id/radio_phrases"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Phrases" />
+                android:text="Phrases"
+                android:background="@null"
+                 />
 
             <RadioButton
                 android:id="@+id/radio_nature"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Nature" />
+                android:text="Nature"
+                android:background="@null"
+               />
 
             <RadioButton
                 android:id="@+id/radio_other"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Other" />
+                android:text="Other"
+                android:background="@null"
+                 />
 
         </RadioGroup>
 
