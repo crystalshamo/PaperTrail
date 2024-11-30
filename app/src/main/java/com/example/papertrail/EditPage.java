@@ -382,17 +382,20 @@ public class EditPage extends AppCompatActivity {
         }
     }
 
-
     private void showTextEditToolbar(EditText editText) {
         if (textEditToolbar != null) {
             textEditToolbar.dismiss();
         }
 
-        // Create the toolbar layout
+        // Create the main toolbar layout
         LinearLayout toolbarLayout = new LinearLayout(this);
-        toolbarLayout.setOrientation(LinearLayout.HORIZONTAL);
+        toolbarLayout.setOrientation(LinearLayout.VERTICAL);
         toolbarLayout.setBackgroundColor(Color.LTGRAY);
         toolbarLayout.setPadding(16, 16, 16, 16);
+
+        // Add a horizontal layout for buttons
+        LinearLayout buttonLayout = new LinearLayout(this);
+        buttonLayout.setOrientation(LinearLayout.HORIZONTAL);
 
         // Add buttons for size and bold adjustments
         Button btnIncrease = new Button(this);
@@ -400,11 +403,10 @@ public class EditPage extends AppCompatActivity {
         btnIncrease.setOnClickListener(v -> {
             float currentSize = editText.getTextSize();
             editText.setTextSize(TypedValue.COMPLEX_UNIT_PX, currentSize + 2);
-            // Ensure EditText keeps focus after resizing
             editText.requestFocus();
             showKeyboard(editText);
         });
-        toolbarLayout.addView(btnIncrease);
+        buttonLayout.addView(btnIncrease);
 
         Button btnDecrease = new Button(this);
         btnDecrease.setText("A-");
@@ -413,46 +415,107 @@ public class EditPage extends AppCompatActivity {
             if (currentSize > 12) {
                 editText.setTextSize(TypedValue.COMPLEX_UNIT_PX, currentSize - 2);
             }
-            // Ensure EditText keeps focus after resizing
             editText.requestFocus();
             showKeyboard(editText);
         });
-        toolbarLayout.addView(btnDecrease);
+        buttonLayout.addView(btnDecrease);
 
         Button btnBold = new Button(this);
         btnBold.setText("B");
         btnBold.setOnClickListener(v -> {
-            int currentStyle = editText.getTypeface().getStyle();
-            if ((currentStyle & Typeface.BOLD) != 0) {
-                editText.setTypeface(Typeface.create(editText.getTypeface(), Typeface.NORMAL));
+            if (editText.getTypeface() != null) {
+                if (editText.getTypeface().isBold()) {
+                    editText.setTypeface(Typeface.create(editText.getTypeface(), Typeface.NORMAL));
+                } else {
+                    editText.setTypeface(Typeface.create(editText.getTypeface(), Typeface.BOLD));
+                }
             } else {
-                editText.setTypeface(Typeface.create(editText.getTypeface(), Typeface.BOLD));
+                editText.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
             }
-            // Ensure EditText keeps focus after styling
             editText.requestFocus();
             showKeyboard(editText);
         });
-        toolbarLayout.addView(btnBold);
+        buttonLayout.addView(btnBold);
 
-        // Create and show the PopupWindow
+        // Add color palette (horizontal layout for colors)
+        LinearLayout colorPalette = new LinearLayout(this);
+        colorPalette.setOrientation(LinearLayout.HORIZONTAL);
+        colorPalette.setPadding(8, 8, 8, 8);
+
+
+        String[] hexColors = {
+                "#FF0000",
+                "#FFA500",
+                "#FFFF00",
+                "#008000",
+                "#0000FF",
+                "#800080",
+                "#FFC0CB",
+                "#000000",
+                "#FFFFFF"
+        };
+        for (String hex : hexColors) {
+            View colorButton = new View(this);
+            colorButton.setBackgroundColor(Color.parseColor(hex));
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(50, 50); // Tiny squares
+            params.setMargins(8, 8, 8, 8);
+            colorButton.setLayoutParams(params);
+            colorButton.setOnClickListener(v -> {
+                editText.setTextColor(Color.parseColor(hex));
+                editText.requestFocus();
+                showKeyboard(editText);
+            });
+            colorPalette.addView(colorButton);
+        }
+
+        // Add the color palette above the buttons
+        toolbarLayout.addView(colorPalette);
+        toolbarLayout.addView(buttonLayout);
+
+        // Create and configure the PopupWindow
         textEditToolbar = new PopupWindow(toolbarLayout, LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         textEditToolbar.setOutsideTouchable(true);
-        textEditToolbar.setFocusable(true);
+        textEditToolbar.setFocusable(false);
+        textEditToolbar.setTouchable(true);
+        textEditToolbar.setBackgroundDrawable(null);
+
+        // Dismiss toolbar on outside touch
+        textEditToolbar.setOnDismissListener(() -> {
+            if (lastFocusedEditText != null) {
+                lastFocusedEditText.clearFocus();
+            }
+        });
 
         // Calculate the position for the toolbar
         int[] location = new int[2];
         editText.getLocationOnScreen(location);
 
+        int screenHeight = getResources().getDisplayMetrics().heightPixels;
         int toolbarHeight = 150; // Approximate height of the toolbar in pixels
-        int yOffset = location[1] - toolbarHeight;
+        int yOffset;
 
-        // Ensure the toolbar doesn't overlap
-        if (yOffset < 0) { // If there's not enough space above, show it below
+        // Determine whether to show the toolbar above or below the EditText
+        if (location[1] + editText.getHeight() + toolbarHeight > screenHeight) {
+            // Not enough space below, show above
+            yOffset = location[1] - toolbarHeight;
+        } else {
+            // Show below
             yOffset = location[1] + editText.getHeight();
         }
 
         // Show the toolbar near the EditText
         textEditToolbar.showAtLocation(editText, Gravity.NO_GRAVITY, location[0], yOffset);
+
+        // Ensure the EditText retains focus
+        editText.requestFocus();
+        showKeyboard(editText);
+
+        // Dismiss the toolbar when the EditText loses focus
+        editText.setOnFocusChangeListener((v, hasFocus) -> {
+            if (!hasFocus) {
+                dismissTextEditToolbar();
+            }
+        });
     }
 
     private void showKeyboard(EditText editText) {
@@ -461,8 +524,6 @@ public class EditPage extends AppCompatActivity {
             imm.showSoftInput(editText, InputMethodManager.SHOW_IMPLICIT);
         }
     }
-
-
 
 
 
