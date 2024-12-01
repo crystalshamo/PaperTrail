@@ -15,12 +15,15 @@ import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.TypedValue;
+import android.view.GestureDetector;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -28,21 +31,30 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.EditText;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.res.ResourcesCompat;
+
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
+
 public class EditPage extends AppCompatActivity {
     private Button btnIncreaseTextSize, btnDecreaseTextSize, btnToggleBold;
     private EditText lastFocusedEditText = null; // Track the last focused EditText
-// Track the last focused EditText
+    // Track the last focused EditText
     private String journalName;
     private String pageNumberText;
     private DatabaseHelper databaseHelper;
     private PopupWindow textEditToolbar;
+    private GestureDetector gestureDetector;
+
 
     private static final int PICK_IMAGE_REQUEST = 1;
     private static final int CAMERA_REQUEST = 2;
@@ -62,6 +74,22 @@ public class EditPage extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_page);
+
+        gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
+            @Override
+            public boolean onDoubleTap(MotionEvent e) {
+                if (selectedImageView != null) {
+                    frameLayout.removeView(selectedImageView); // Remove the selected ImageView
+                    movableViews.remove(selectedImageView);   // Remove from the tracked list
+                    selectedImageView = null;                 // Clear the selection
+                } else if (lastFocusedEditText != null) {
+                    frameLayout.removeView(lastFocusedEditText); // Remove the focused EditText
+                    movableViews.remove(lastFocusedEditText);    // Remove from the tracked list
+                    lastFocusedEditText = null;                  // Clear the selection
+                }
+                return true; // Event handled
+            }
+        });
 
         journalName = getIntent().getStringExtra("journal_name");
         if (journalName == null) {
@@ -232,8 +260,10 @@ public class EditPage extends AppCompatActivity {
         stickerView.setX(100); // Initial position
         stickerView.setY(100);
 
+        // Attach touch listener
         stickerView.setOnTouchListener((v, event) -> {
-            scaleGestureDetector.onTouchEvent(event);
+            gestureDetector.onTouchEvent(event); // Handle double-tap for deletion
+            scaleGestureDetector.onTouchEvent(event); // Handle scaling
             switch (event.getActionMasked()) {
                 case MotionEvent.ACTION_DOWN:
                     initialX = event.getRawX() - v.getX();
@@ -248,25 +278,26 @@ public class EditPage extends AppCompatActivity {
             return true;
         });
 
-        // Add the sticker to the FrameLayout
         frameLayout.addView(stickerView);
-
-        // Track the ImageView in the generalized list
         movableViews.add(stickerView);
     }
 
 
 
-    @SuppressLint("ClickableViewAccessibility")
     private void addImageToPage(Bitmap bitmap) {
         ImageView imageViewPage = new ImageView(this);
         imageViewPage.setImageBitmap(bitmap);
-        imageViewPage.setLayoutParams(new FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT));
+        imageViewPage.setLayoutParams(new FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.WRAP_CONTENT,
+                FrameLayout.LayoutParams.WRAP_CONTENT
+        ));
         imageViewPage.setX(100); // Initial X position
         imageViewPage.setY(100); // Initial Y position
 
+        // Attach touch listener
         imageViewPage.setOnTouchListener((v, event) -> {
-            scaleGestureDetector.onTouchEvent(event);
+            gestureDetector.onTouchEvent(event); // Handle double-tap for deletion
+            scaleGestureDetector.onTouchEvent(event); // Handle scaling
             switch (event.getActionMasked()) {
                 case MotionEvent.ACTION_DOWN:
                     initialX = event.getRawX() - v.getX();
@@ -284,6 +315,7 @@ public class EditPage extends AppCompatActivity {
         frameLayout.addView(imageViewPage);
         movableViews.add(imageViewPage);
     }
+
 
     private void savePage() {
         pageNumberText = pageNumberTv.getText().toString();
@@ -309,8 +341,6 @@ public class EditPage extends AppCompatActivity {
         int pageNumber = Integer.parseInt(pageNumberText);
         pageNumberTv.setText(String.valueOf(pageNumber + 1));
     }
-
-
 
 
     private void addMovableEditText() {
@@ -375,10 +405,135 @@ public class EditPage extends AppCompatActivity {
 
         lastFocusedEditText = editText; // Update last focused EditText
     }
+
     private void dismissTextEditToolbar() {
         if (textEditToolbar != null) {
             textEditToolbar.dismiss();
             textEditToolbar = null; // Set to null to prevent reuse of a dismissed toolbar
+        }
+    }
+   public void showFontPicker() {
+        String[] fontNames = {
+                "Alegreya Sans Medium", "Alex Brush", "Christmas", "Fjalla One Regular", "Geomanist Regular",
+                "Geomanist Regular Italic", "Montserrat Alternates Italic", "Montserrat Bold", "Montserrat Medium",
+                "Playfair Display Bold", "Playfair Display Regular", "Reef"
+        };
+
+
+        ArrayAdapter<String> fontAdapter = new ArrayAdapter<String>(this, android.R.layout.select_dialog_item, fontNames) {
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                TextView textView = (TextView) super.getView(position, convertView, parent);
+
+                switch (position) {
+                    case 0:
+                        textView.setTypeface(ResourcesCompat.getFont(EditPage.this, R.font.alegreyaaansmedium));
+                        break;
+                    case 1:
+                        textView.setTypeface(ResourcesCompat.getFont(EditPage.this, R.font.alexbrush));
+                        break;
+                    case 2:
+                        textView.setTypeface(ResourcesCompat.getFont(EditPage.this, R.font.chfont));
+                        break;
+                    case 3:
+                        textView.setTypeface(ResourcesCompat.getFont(EditPage.this, R.font.fjallaoneregular));
+                        break;
+                    case 4:
+                        textView.setTypeface(ResourcesCompat.getFont(EditPage.this, R.font.geomanistregular));
+                        break;
+                    case 5:
+                        textView.setTypeface(ResourcesCompat.getFont(EditPage.this, R.font.geomanistregularitalic));
+                        break;
+                    case 6:
+                        textView.setTypeface(ResourcesCompat.getFont(EditPage.this, R.font.montserratalternatesitalic));
+                        break;
+                    case 7:
+                        textView.setTypeface(ResourcesCompat.getFont(EditPage.this, R.font.montserratbold));
+                        break;
+                    case 8:
+                        textView.setTypeface(ResourcesCompat.getFont(EditPage.this, R.font.montserratmedium));
+                        break;
+                    case 9:
+                        textView.setTypeface(ResourcesCompat.getFont(EditPage.this, R.font.playfairdisplaybold));
+                        break;
+                    case 10:
+                        textView.setTypeface(ResourcesCompat.getFont(EditPage.this, R.font.playfairdisplayregular));
+                        break;
+                    case 11:
+                        textView.setTypeface(ResourcesCompat.getFont(EditPage.this, R.font.reef));
+                        break;
+                    default:
+                        break;
+                }
+                return textView;
+            }
+        };
+
+
+        new AlertDialog.Builder(this)
+                .setTitle("Select a Font\n")
+                .setAdapter(fontAdapter, (dialog, which) -> {
+                    // Apply the selected font (if you need to handle it)
+                    applyFont(fontNames[which]);
+                })
+                .show();
+    }
+
+
+
+    private void applyFont(String fontName) {
+        if (lastFocusedEditText != null) {
+            int fontResId = 0;
+
+            switch (fontName) {
+                case "Alegreya Sans Medium":
+                    fontResId = R.font.alegreyaaansmedium;
+                    break;
+                case "Alex Brush":
+                    fontResId = R.font.alexbrush;
+                    break;
+                case "Christmas":
+                    fontResId = R.font.chfont;
+                    break;
+                case "Fjalla One Regular":
+                    fontResId = R.font.fjallaoneregular;
+                    break;
+                case "Geomanist Regular":
+                    fontResId = R.font.geomanistregular;
+                    break;
+                case "Geomanist Regular Italic":
+                    fontResId = R.font.geomanistregularitalic;
+                    break;
+                case "Montserrat Alternates Italic":
+                    fontResId = R.font.montserratalternatesitalic;
+                    break;
+                case "Montserrat Bold":
+                    fontResId = R.font.montserratbold;
+                    break;
+                case "Montserrat Medium":
+                    fontResId = R.font.montserratmedium;
+                    break;
+                case "Playfair Display Bold":
+                    fontResId = R.font.playfairdisplaybold;
+                    break;
+                case "Playfair Display Regular":
+                    fontResId = R.font.playfairdisplayregular;
+                    break;
+                case "Reef":
+                    fontResId = R.font.reef;
+                    break;
+                default:
+                    Toast.makeText(this, "Font not found!", Toast.LENGTH_SHORT).show();
+                    return;
+            }
+
+
+            Typeface typeface = ResourcesCompat.getFont(this, fontResId);
+            if (typeface != null) {
+                lastFocusedEditText.setTypeface(typeface);
+            } else {
+                Toast.makeText(this, "Failed to load font!", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
@@ -387,17 +542,17 @@ public class EditPage extends AppCompatActivity {
             textEditToolbar.dismiss();
         }
 
-        // Create the main toolbar layout
+
         LinearLayout toolbarLayout = new LinearLayout(this);
         toolbarLayout.setOrientation(LinearLayout.VERTICAL);
         toolbarLayout.setBackgroundColor(Color.LTGRAY);
         toolbarLayout.setPadding(16, 16, 16, 16);
 
-        // Add a horizontal layout for buttons
+
         LinearLayout buttonLayout = new LinearLayout(this);
         buttonLayout.setOrientation(LinearLayout.HORIZONTAL);
 
-        // Add buttons for size and bold adjustments
+
         Button btnIncrease = new Button(this);
         btnIncrease.setText("A+");
         btnIncrease.setOnClickListener(v -> {
@@ -436,6 +591,12 @@ public class EditPage extends AppCompatActivity {
             showKeyboard(editText);
         });
         buttonLayout.addView(btnBold);
+
+        //font button
+        Button btnFont = new Button(this);
+        btnFont.setText("F");
+        btnFont.setOnClickListener(v -> showFontPicker());
+        buttonLayout.addView(btnFont);
 
         // Add color palette (horizontal layout for colors)
         LinearLayout colorPalette = new LinearLayout(this);
@@ -524,7 +685,6 @@ public class EditPage extends AppCompatActivity {
             imm.showSoftInput(editText, InputMethodManager.SHOW_IMPLICIT);
         }
     }
-
 
 
     private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
