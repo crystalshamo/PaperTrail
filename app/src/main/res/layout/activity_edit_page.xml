@@ -95,6 +95,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
+
         <com.google.android.material.bottomnavigation.BottomNavigationView
             app:itemActiveIndicatorStyle="@color/black"
             app:backgroundTint="#5d1c34"
@@ -119,4 +120,3 @@
             app:layout_constraintTop_toBottomOf="@+id/frameLayoutPage" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
-

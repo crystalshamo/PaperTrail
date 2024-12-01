@@ -1,17 +1,20 @@
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:gravity="center"
     android:padding="8dp">
 
-    <ImageView
-        android:id="@+id/item_image"
-        android:layout_width="170dp"
-        android:layout_height="170dp"
-        android:scaleType="centerCrop"
-        android:src="@drawable/white_background" />
+
+        <ImageView
+            android:id="@+id/item_image"
+            android:layout_width="150dp"
+            android:layout_height="180dp"
+            android:scaleType="centerCrop"
+            android:elevation="8dp"
+            android:layout_gravity="center"
+            android:background="@drawable/border"/>
+
 
     <TextView
         android:id="@+id/item_text"
@@ -19,6 +22,7 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:paddingTop="8dp"
+        android:elevation="8dp"
         android:textSize="22sp"
         android:textColor="#000"
         android:text="Journal Name" />
