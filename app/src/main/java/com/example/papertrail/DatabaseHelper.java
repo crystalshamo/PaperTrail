@@ -390,7 +390,36 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return bitmaps;  // Return the list of bitmaps
     }
 
+    public boolean hasAtLeastOnePage(String journalName) {
+        SQLiteDatabase db = this.getReadableDatabase();
 
+        // Get the journal ID by name
+        int journalId = getJournalIdByName(journalName);
+
+        // If the journal ID is -1, the journal does not exist
+        if (journalId == -1) {
+            return false;
+        }
+
+        // Query the PageTable to check if there is at least one page for the journal
+        Cursor cursor = db.query(
+                PAGE_TABLE,
+                new String[]{"id"},  // We only need the id to check for existence
+                "journal_id = ?",  // Filter by journal_id
+                new String[]{String.valueOf(journalId)},
+                null, null,  // No grouping or ordering needed
+                null
+        );
+
+        boolean hasPage = cursor != null && cursor.moveToFirst();  // If cursor has data, the journal has at least one page
+
+        // Close the cursor to avoid memory leaks
+        if (cursor != null) {
+            cursor.close();
+        }
+
+        return hasPage;  // Return true if the journal has at least one page, false otherwise
+    }
 
 
 }

@@ -3,11 +3,13 @@ package com.example.papertrail;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -21,15 +23,12 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-public class EditPage extends AppCompatActivity {
+import java.io.ByteArrayOutputStream;
+public class EditPage extends AppCompatActivity implements ColorWheelView.OnColorSelectedListener {
+
     private String journalName;
     private DatabaseHelper databaseHelper;
     private EditPageViewModel viewModel;
@@ -37,22 +36,23 @@ public class EditPage extends AppCompatActivity {
 
     private static final int PICK_IMAGE_REQUEST = 1;
     private static final int CAMERA_REQUEST = 2;
+    private static final int CROP_IMAGE_REQUEST = 3;
 
     private FrameLayout frameLayout;
-    private List<ImageView> imageViews = new ArrayList<>();
     private TextView pageNumberTv;
-    private Button prevButton, captureButton, nextButton, addPageButton, deletePageButton;
+    private Button prevButton, captureButton, nextButton, addPageButton, deletePageButton, paintButton;
     private ScaleGestureDetector scaleGestureDetector;
     private float initialX = 0f, initialY = 0f;
     private BottomNavigationView bottomNavigationView;
-    Intent stickerIntent;
+    private ColorWheelView colorWheelView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_page);
-        viewModel = new ViewModelProvider(this).get(EditPageViewModel.class);
 
+        // Initialize ViewModel and DatabaseHelper
+        viewModel = new ViewModelProvider(this).get(EditPageViewModel.class);
         journalName = getIntent().getStringExtra("journal_name");
         if (journalName == null) {
             Toast.makeText(this, "No journal selected", Toast.LENGTH_SHORT).show();
@@ -71,18 +71,16 @@ public class EditPage extends AppCompatActivity {
         initializeViews();
         setupBottomNavigation();
 
-        viewModel.getCurrentPage().observe(this, new Observer<Integer>() {
-            @Override
-            public void onChanged(Integer pageNumber) {
-                // Update UI when page number changes
-                pageNumberTv.setText(String.valueOf(pageNumber));
-                loadPage(pageNumber);
-                loadArrows(pageNumber);
-            }
+        // Observe page number changes
+        viewModel.getCurrentPage().observe(this, pageNumber -> {
+            pageNumberTv.setText(String.valueOf(pageNumber));
+            loadPage(pageNumber);
+            loadArrows(pageNumber);
         });
     }
 
     private void initializeViews() {
+        // Initialize all UI elements
         prevButton = findViewById(R.id.buttonPrev);
         nextButton = findViewById(R.id.buttonNext);
         frameLayout = findViewById(R.id.pageLayout);
@@ -90,6 +88,8 @@ public class EditPage extends AppCompatActivity {
         addPageButton = findViewById(R.id.buttonAddPage);
         pageNumberTv = findViewById(R.id.pageNumberTv);
         deletePageButton = findViewById(R.id.buttonDeletePage);
+        paintButton = findViewById(R.id.buttonPaint);
+        colorWheelView = findViewById(R.id.colorWheelView);
 
         prevButton.setOnClickListener(v -> decrementPage());
         nextButton.setOnClickListener(v -> incrementPage());
@@ -97,6 +97,8 @@ public class EditPage extends AppCompatActivity {
         captureButton.setOnClickListener(v -> savePage());
         deletePageButton.setOnClickListener(v -> deletePage());
 
+        paintButton.setOnClickListener(v -> colorWheelView.setVisibility(View.VISIBLE));
+        colorWheelView.setOnColorSelectedListener(this);
 
         scaleGestureDetector = new ScaleGestureDetector(this, new ScaleListener());
     }
@@ -109,12 +111,13 @@ public class EditPage extends AppCompatActivity {
 
         bottomNavigationView.setOnNavigationItemSelectedListener(item -> {
             switch (item.getItemId()) {
-                case 1: showImagePickerDialog(); break;
-                case 2: // Handle Text selection
-                     break;
-                case 3: stickerIntent = new Intent(EditPage.this, StickerScreen.class);
-                startActivity(stickerIntent);
-                break;
+                case 1:
+                    showImagePickerDialog();
+                    break;
+                case 3:
+                    Intent stickerIntent = new Intent(EditPage.this, StickerScreen.class);
+                    startActivity(stickerIntent);
+                    break;
             }
             return true;
         });
@@ -127,8 +130,7 @@ public class EditPage extends AppCompatActivity {
         if (databaseHelper.isPageExist(pageNumber, journalName)) {
             Bitmap bitmap = databaseHelper.getPageImageFromDatabase(journalName, pageNumber);
             if (bitmap != null) {
-                Drawable drawable = new BitmapDrawable(getResources(), bitmap);
-                frameLayout.setBackground(drawable);
+                frameLayout.setBackground(new BitmapDrawable(getResources(), bitmap));
             }
         } else {
             frameLayout.setBackgroundColor(Color.WHITE);
@@ -144,16 +146,12 @@ public class EditPage extends AppCompatActivity {
             addPageButton.setVisibility(View.VISIBLE);
         }
 
-        if (databaseHelper.hasPagesLessThan(pageNumber,journalName)) {
-            prevButton.setVisibility(View.VISIBLE);
-        } else {
-            prevButton.setVisibility(View.INVISIBLE);
-        }
+        prevButton.setVisibility(databaseHelper.hasPagesLessThan(pageNumber, journalName) ? View.VISIBLE : View.INVISIBLE);
     }
 
     private void showImagePickerDialog() {
         String[] options = {"Take Photo", "Choose from Gallery"};
-        new android.app.AlertDialog.Builder(this)
+        new AlertDialog.Builder(this)
                 .setItems(options, (dialog, which) -> {
                     if (which == 0) openCamera();
                     else openGallery();
@@ -177,20 +175,45 @@ public class EditPage extends AppCompatActivity {
         if (resultCode == RESULT_OK && data != null) {
             if (requestCode == PICK_IMAGE_REQUEST) {
                 Uri imageUri = data.getData();
-                try {
-                    InputStream inputStream = getContentResolver().openInputStream(imageUri);
-                    Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
-                    addImageToPage(bitmap);
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                    Toast.makeText(this, "Failed to load image", Toast.LENGTH_SHORT).show();
-                }
+                if (imageUri != null) startCrop(imageUri);
             } else if (requestCode == CAMERA_REQUEST) {
-                // If the result is from the camera
                 Bitmap photo = (Bitmap) data.getExtras().get("data");
-                addImageToPage(photo);
+                Uri tempUri = getImageUri(getApplicationContext(), photo);
+                startCrop(tempUri);
+            } else if (requestCode == CROP_IMAGE_REQUEST) {
+                handleCropResult(data);
             }
         }
+    }
+
+    private void startCrop(Uri sourceUri) {
+        Intent cropIntent = new Intent("com.android.camera.action.CROP");
+        cropIntent.setDataAndType(sourceUri, "image/*");
+        cropIntent.putExtra("crop", "true");
+        cropIntent.putExtra("outputX", 500); // Set output width
+        cropIntent.putExtra("outputY", 500); // Set output height
+        cropIntent.putExtra("aspectX", 1); // Aspect ratio
+        cropIntent.putExtra("aspectY", 1); // Aspect ratio
+        cropIntent.putExtra("scale", true); // Scale image
+        cropIntent.putExtra("return-data", true); // Return data as a Bitmap
+        startActivityForResult(cropIntent, CROP_IMAGE_REQUEST);
+    }
+
+    private void handleCropResult(Intent result) {
+        Bundle extras = result.getExtras();
+        if (extras != null) {
+            Bitmap croppedBitmap = extras.getParcelable("data");
+            if (croppedBitmap != null) {
+                addImageToPage(croppedBitmap);
+            }
+        }
+    }
+
+    public static Uri getImageUri(Context context, Bitmap inImage) {
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        inImage.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
+        String path = MediaStore.Images.Media.insertImage(context.getContentResolver(), inImage, "Title", null);
+        return Uri.parse(path);
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -203,28 +226,33 @@ public class EditPage extends AppCompatActivity {
 
         imageViewPage.setOnTouchListener((v, event) -> {
             scaleGestureDetector.onTouchEvent(event);
-            switch (event.getActionMasked()) {
-                case MotionEvent.ACTION_DOWN:
-                    initialX = event.getRawX() - v.getX();
-                    initialY = event.getRawY() - v.getY();
-                    selectedImageView = (ImageView) v;
-                    break;
-                case MotionEvent.ACTION_MOVE:
-                    v.setX(event.getRawX() - initialX);
-                    v.setY(event.getRawY() - initialY);
-                    break;
-            }
+            handleImageTouch(v, event);
             return true;
         });
 
         frameLayout.addView(imageViewPage);
-        imageViews.add(imageViewPage);
     }
 
+    private void handleImageTouch(View v, MotionEvent event) {
+        if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
+            initialX = event.getRawX() - v.getX();
+            initialY = event.getRawY() - v.getY();
+            selectedImageView = (ImageView) v;
+        } else if (event.getActionMasked() == MotionEvent.ACTION_MOVE) {
+            v.setX(event.getRawX() - initialX);
+            v.setY(event.getRawY() - initialY);
+        }
+    }
+
+    @Override
+    public void onColorSelected(int color) {
+        frameLayout.setBackgroundColor(color);
+        colorWheelView.setVisibility(View.GONE);
+    }
 
     private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
         @Override
-        public boolean onScale(ScaleGestureDetector detector) {
+        public boolean onScale(@NonNull ScaleGestureDetector detector) {
             if (selectedImageView != null) {
                 float scaleFactor = detector.getScaleFactor();
                 selectedImageView.setScaleX(selectedImageView.getScaleX() * scaleFactor);
@@ -234,11 +262,9 @@ public class EditPage extends AppCompatActivity {
         }
     }
 
-
     private void decrementPage() {
         viewModel.decrementPage();
     }
-
 
     private void incrementPage() {
         viewModel.incrementPage();
@@ -246,7 +272,6 @@ public class EditPage extends AppCompatActivity {
 
     private void savePage() {
         Integer pageNumber = viewModel.getCurrentPage().getValue();
-
         if (pageNumber == null) {
             Toast.makeText(this, "Invalid page number", Toast.LENGTH_SHORT).show();
             return;
@@ -262,20 +287,14 @@ public class EditPage extends AppCompatActivity {
 
     private void deletePage() {
         Integer pageNumber = viewModel.getCurrentPage().getValue();
-        if (pageNumber==1 && !databaseHelper.hasPagesGreaterThan(pageNumber, journalName)) {
+        if (pageNumber == 1 && !databaseHelper.hasPagesGreaterThan(pageNumber, journalName)) {
             databaseHelper.deletePage(pageNumber, journalName);
             databaseHelper.deleteJournal(journalName);
-            Intent intent = new Intent(EditPage.this, HomeScreen.class);
-            startActivity(intent);
-        } else if (pageNumber==1) {
-            databaseHelper.deletePage(pageNumber, journalName);
-            loadPage(pageNumber);
+            startActivity(new Intent(EditPage.this, HomeScreen.class));
         } else {
             databaseHelper.deletePage(pageNumber, journalName);
-            decrementPage();
+            loadPage(pageNumber);
+            if (pageNumber > 1) decrementPage();
         }
     }
-
 }
-
-

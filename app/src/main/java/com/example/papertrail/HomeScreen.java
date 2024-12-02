@@ -85,7 +85,7 @@ public class HomeScreen extends AppCompatActivity {
         });
 
         viewJournalButton.setOnClickListener(v-> {
-            if (selectedJournal == null) {
+            if (selectedJournal == null || !myDbHelper.hasAtLeastOnePage(selectedJournal)) {
                 Toast.makeText(HomeScreen.this, "Please select a journal to edit", Toast.LENGTH_SHORT).show();
             } else {
                 viewJournal(selectedJournal);

@@ -1,6 +1,7 @@
 package com.example.papertrail;
 
 import android.os.Bundle;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -15,6 +16,7 @@ public class ViewJournal extends AppCompatActivity {
     PageCurlView curlview;
     DatabaseHelper dbhelper;
     String journalName;
+    TextView journaltv;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,5 +46,8 @@ public class ViewJournal extends AppCompatActivity {
 
         curlview = findViewById(R.id.curlview);
         curlview.setCurlView(dbhelper.getAllPagesAsBitmaps(journalName));
+
+        journaltv = findViewById(R.id.journaltitle);
+        journaltv.setText(journalName);
     }
 }
