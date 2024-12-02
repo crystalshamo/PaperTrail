@@ -284,27 +284,46 @@ public class EditPage extends AppCompatActivity {
 
 
 
+    @SuppressLint("ClickableViewAccessibility")
     private void addImageToPage(Bitmap bitmap) {
         ImageView imageViewPage = new ImageView(this);
         imageViewPage.setImageBitmap(bitmap);
-        imageViewPage.setLayoutParams(new FrameLayout.LayoutParams(
-                FrameLayout.LayoutParams.WRAP_CONTENT,
-                FrameLayout.LayoutParams.WRAP_CONTENT
-        ));
+        imageViewPage.setLayoutParams(new FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT));
         imageViewPage.setX(100); // Initial X position
         imageViewPage.setY(100); // Initial Y position
 
-        // Attach touch listener
+        // To store the angle of rotation
+        float[] lastTouchEvent = new float[2];
+        AtomicReference<Float> angle = new AtomicReference<>((float) 0);
+
         imageViewPage.setOnTouchListener((v, event) -> {
-            gestureDetector.onTouchEvent(event); // Handle double-tap for deletion
-            scaleGestureDetector.onTouchEvent(event); // Handle scaling
+            scaleGestureDetector.onTouchEvent(event);
             switch (event.getActionMasked()) {
                 case MotionEvent.ACTION_DOWN:
                     initialX = event.getRawX() - v.getX();
                     initialY = event.getRawY() - v.getY();
                     selectedImageView = (ImageView) v;
                     break;
+
                 case MotionEvent.ACTION_MOVE:
+                    // If there are two touch points, calculate the angle for rotation
+                    if (event.getPointerCount() > 1) {
+                        float x0 = event.getX(0);
+                        float y0 = event.getY(0);
+                        float x1 = event.getX(1);
+                        float y1 = event.getY(1);
+
+                        // Calculate the angle between the two touch points
+                        float deltaX = x1 - x0;
+                        float deltaY = y1 - y0;
+                        float radians = (float) Math.atan2(deltaY, deltaX);
+                        angle.set((float) Math.toDegrees(radians));
+
+                        // Apply rotation to the image view
+                        imageViewPage.setRotation(angle.get());
+                    }
+
+                    // Handle image movement with drag
                     v.setX(event.getRawX() - initialX);
                     v.setY(event.getRawY() - initialY);
                     break;
@@ -315,6 +334,7 @@ public class EditPage extends AppCompatActivity {
         frameLayout.addView(imageViewPage);
         movableViews.add(imageViewPage);
     }
+
 
 
     private void savePage() {
