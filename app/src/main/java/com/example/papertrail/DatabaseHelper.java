@@ -197,6 +197,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.close();
     }
 
+
     public byte[] bitmapToByteArray(Bitmap bitmap) {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);

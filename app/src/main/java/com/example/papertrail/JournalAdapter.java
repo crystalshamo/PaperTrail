@@ -65,20 +65,13 @@ public class JournalAdapter extends BaseAdapter {
         String journalName = journalNames.get(position);
         holder.textView.setText(journalName);
 
-        // Fetch and set the first page's image from the stored list
-        if (position < journalImages.size()) {
-            Bitmap firstPageImage = journalImages.get(position);
-            if (firstPageImage != null) {
-                holder.imageView.setImageBitmap(firstPageImage);
-            } else {
-                // Use a default image if no first page image is available
-                holder.imageView.setImageResource(R.drawable.white_background);
-            }
+        // Fetch the image dynamically
+        Bitmap firstPageImage = databaseHelper.getPageImageFromDatabase(journalName, 1);
+        if (firstPageImage != null) {
+            holder.imageView.setImageBitmap(firstPageImage);
         } else {
-            // Handle case where the image is not available yet
             holder.imageView.setImageResource(R.drawable.white_background);
         }
-
 
         return convertView;
     }
@@ -91,11 +84,13 @@ public class JournalAdapter extends BaseAdapter {
     // Modified updateData method to accept both journal names and their corresponding images
     public void updateData(List<String> newJournalNames) {
         this.journalNames.clear();
-        this.journalImages.clear();
         this.journalNames.addAll(newJournalNames);
 
-        populateJournalImages(); // Re-populate images when data is updated
+        // Clear and repopulate images
+        this.journalImages.clear();
+        populateJournalImages();
 
+        // Notify the adapter to refresh the UI
         notifyDataSetChanged();
     }
 

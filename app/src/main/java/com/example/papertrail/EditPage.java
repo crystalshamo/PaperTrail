@@ -3,6 +3,7 @@ package com.example.papertrail;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -302,8 +303,15 @@ public class EditPage extends AppCompatActivity {
         frameLayout.setDrawingCacheEnabled(false);
 
         databaseHelper.saveImageToPageTable(journalName, pageNumber, bm);
+        // In the activity where you update the cover image
+        SharedPreferences sharedPreferences = getSharedPreferences("cover_update", MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean("cover_updated", true);  // Set the flag to true
+        editor.apply();
+
         Toast.makeText(this, "Saved", Toast.LENGTH_SHORT).show();
     }
+
 
     private void decrementPage() {
         pageNumberText = pageNumberTv.getText().toString();
@@ -387,58 +395,6 @@ public class EditPage extends AppCompatActivity {
             textEditToolbar = null; // Set to null to prevent reuse of a dismissed toolbar
         }
     }
-
-
-    //pop-up for font
-    /*private void showFontPicker() {
-        String[] fontNames = {"Alegreya Sans Medium", "Alex Brush", "Christmas", "Fjalla One Regular", "Geomanist Regular", "Geomanist Regular Italic",
-                "Montserrat Alternates Italic", "Montserrat Bold", "Montserrat Medium", "Playfair Display Bold", "Playfair Display Regular", "Reef" };
-
-        new android.app.AlertDialog.Builder(this)
-                .setTitle("Select a Font")
-                .setItems(fontNames, (dialog, which) -> {
-                    switch (which) {
-                        case 0:
-                            applyFont("alegreyaaansmedium");
-                            break;
-                        case 1:
-                            applyFont("alexbrush");
-                            break;
-                        case 2:
-                            applyFont("chfont");
-                            break;
-                        case 3:
-                            applyFont("fjallaoneregular");
-                            break;
-                        case 4:
-                            applyFont("geomanistregular");
-                            break;
-                        case 5:
-                            applyFont("geomanistregularitalic");
-                            break;
-                        case 6:
-                            applyFont("montserratalternatesitalic");
-                            break;
-                        case 7:
-                            applyFont("montserratbold");
-                            break;
-                        case 8:
-                            applyFont("montserratmedium");
-                            break;
-                        case 9:
-                            applyFont("playfairdisplaybold");
-                            break;
-                        case 10:
-                            applyFont("playfairdisplayregular");
-                            break;
-                        case 11:
-                            applyFont("reef");
-                            break;
-
-                    }
-                })
-                .show();
-    }*/
 
     private void showFontPicker() {
         String[] fontNames = {

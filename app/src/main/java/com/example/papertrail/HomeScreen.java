@@ -2,6 +2,7 @@ package com.example.papertrail;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.view.GestureDetector;
@@ -19,6 +20,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AlertDialog;
+import com.example.papertrail.DatabaseHelper;
 
 import java.io.IOException;
 import java.util.List;
@@ -55,7 +57,7 @@ public class HomeScreen extends AppCompatActivity {
         JournalAdapter adapter = new JournalAdapter(this, journalNames, myDbHelper);
         gridView.setAdapter(adapter);
 
-        // Gesture detector for double tap on GridView
+        // double tap on GridView
         GestureDetector gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
             @Override
             public boolean onDoubleTap(MotionEvent e) {
@@ -78,30 +80,21 @@ public class HomeScreen extends AppCompatActivity {
         addJournalButton.setOnClickListener(v -> showAddJournalPopup());
         deleteJournalButton.setOnClickListener(v -> showDeleteJournalPopup());
 
-       /*deleteJournalButton.setOnClickListener(v -> {
-            if (selectedJournal == null) {
-                Toast.makeText(HomeScreen.this, "Please select a journal to delete", Toast.LENGTH_SHORT).show();
-            } else {
-
-                deleteJournal(selectedJournal);
-            }
-        });*/
     }
+
 
     private void deleteJournal(String selectedJournal) {
         myDbHelper.deleteJournal(selectedJournal);
-
-        // Fetch the updated list of journals from the database
         journalNames = myDbHelper.getJournalNames();
 
-        // Update the GridView's adapter
+        // Update the GridView
         GridView gridView = findViewById(R.id.gridView);
         JournalAdapter adapter = (JournalAdapter) gridView.getAdapter();
         adapter.updateData(journalNames);
         adapter.notifyDataSetChanged();
 
-        // Show a confirmation toast
-        Toast.makeText(this, "Journal deleted", Toast.LENGTH_SHORT).show();
+        // Show toast
+        Toast.makeText(this, "Journal: " + selectedJournal + " deleted", Toast.LENGTH_SHORT).show();
     }
 
     private void editJournal(String selectedJournal) {
@@ -152,7 +145,7 @@ public class HomeScreen extends AppCompatActivity {
         dialog.show();
 
         if (selectedJournal != null) {
-            deleteText.setText("Are you sure you want to delete " + selectedJournal + "?");
+            deleteText.setText("Are you sure you want to delete " + selectedJournal);
         } else {
             deleteText.setText("Please select a journal to delete.");
         }
@@ -168,7 +161,7 @@ public class HomeScreen extends AppCompatActivity {
         });
 
 
-        buttonNo.setOnClickListener(v -> dialog.dismiss()); // Close the dialog
+        buttonNo.setOnClickListener(v -> dialog.dismiss()); // Close
     }
 
     private void addNewJournal(String name) {
@@ -183,6 +176,30 @@ public class HomeScreen extends AppCompatActivity {
         adapter.notifyDataSetChanged();
 
         Toast.makeText(this, "Journal added", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        SharedPreferences sharedPreferences = getSharedPreferences("cover_update", MODE_PRIVATE);
+        boolean isCoverUpdated = sharedPreferences.getBoolean("cover_updated", false);
+
+        if (isCoverUpdated) {
+            // Refresh the journal list from the database
+            journalNames = myDbHelper.getJournalNames(); // Update journalNames
+
+            // Get the GridView and adapter, then notify the adapter to refresh the view
+            GridView gridView = findViewById(R.id.gridView);
+            JournalAdapter adapter = (JournalAdapter) gridView.getAdapter();
+            if (adapter != null) {
+                adapter.updateData(journalNames);  // Update the data source
+                adapter.notifyDataSetChanged();  // Notify the adapter that data has changed
+            }
+
+            // Reset the flag in SharedPreferences
+            sharedPreferences.edit().putBoolean("cover_updated", false).apply();
+        }
     }
 
 
