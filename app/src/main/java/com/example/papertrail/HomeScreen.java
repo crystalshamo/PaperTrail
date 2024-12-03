@@ -51,6 +51,7 @@ public class HomeScreen extends AppCompatActivity {
 
         ImageButton addJournalButton = findViewById(R.id.addJournalButton);
         ImageButton deleteJournalButton = findViewById(R.id.deleteJournalButton);
+        ImageButton viewJournalButton = findViewById(R.id.viewJournalButton);
 
         // Set up the GridView
         GridView gridView = findViewById(R.id.gridView);
@@ -80,7 +81,22 @@ public class HomeScreen extends AppCompatActivity {
         addJournalButton.setOnClickListener(v -> showAddJournalPopup());
         deleteJournalButton.setOnClickListener(v -> showDeleteJournalPopup());
 
+        viewJournalButton.setOnClickListener(v-> {
+            if (selectedJournal == null || !myDbHelper.hasAtLeastOnePage(selectedJournal)) {
+                Toast.makeText(HomeScreen.this, "Please select a journal to edit", Toast.LENGTH_SHORT).show();
+            } else {
+                viewJournal(selectedJournal);
+            }
+        });
     }
+
+    private void viewJournal(String selectedJournal) {
+        Intent intent = new Intent(HomeScreen.this, ViewJournal.class);
+        intent.putExtra("journal_name", selectedJournal);
+        startActivity(intent);
+    }
+
+
 
 
     private void deleteJournal(String selectedJournal) {
