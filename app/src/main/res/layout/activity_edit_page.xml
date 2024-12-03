@@ -31,7 +31,6 @@
                     android:layout_height="match_parent"
                     android:background="@android:color/white" />
         </FrameLayout>
-
         <LinearLayout
             android:id="@+id/imageToolbar"
             android:orientation="horizontal"
@@ -39,34 +38,29 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="#AA000000"
-            android:gravity="center_vertical|end"
-            android:padding="8dp">
+        android:layout_height="60dp"
+        android:background="#AA000000"
+        android:padding="8dp">
 
-                <Button
-                    android:id="@+id/btnRotateLeft"
-                    android:text="Rotate Left"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
+        <Button
+            android:id="@+id/btnRotateLeft"
+            android:text="Rotate Left"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
 
-                <Button
-                    android:id="@+id/btnRotateRight"
-                    android:text="Rotate Right"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
+        <Button
+            android:id="@+id/btnRotateRight"
+            android:text="Rotate Right"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
 
-                <!-- Delete button -->
-                <Button
-                    android:id="@+id/btnDelete"
-                    android:text="Delete"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
-        </LinearLayout>
-
-
+        <Button
+            android:id="@+id/btnDelete"
+            android:text="Delete"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+</LinearLayout>
         <com.example.papertrail.ColorWheelView
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"

@@ -87,22 +87,6 @@ public class EditPage extends AppCompatActivity implements  ColorWheelView.OnCol
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_page);
 
-        gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
-            @Override
-            public boolean onDoubleTap(MotionEvent e) {
-                if (selectedImageView != null) {
-                    frameLayout.removeView(selectedImageView); // Remove the selected ImageView
-                    movableViews.remove(selectedImageView);   // Remove from the tracked list
-                    selectedImageView = null;                 // Clear the selection
-                } else if (lastFocusedEditText != null) {
-                    frameLayout.removeView(lastFocusedEditText); // Remove the focused EditText
-                    movableViews.remove(lastFocusedEditText);    // Remove from the tracked list
-                    lastFocusedEditText = null;                  // Clear the selection
-                }
-                return true; // Event handled
-            }
-        });
-
         viewModel = new ViewModelProvider(this).get(EditPageViewModel.class);
 
         journalName = getIntent().getStringExtra("journal_name");
@@ -133,6 +117,7 @@ public class EditPage extends AppCompatActivity implements  ColorWheelView.OnCol
             loadPage(pageNumber);
             loadArrows(pageNumber);
         });
+
     }
 
     private void initializeViews() {
@@ -292,6 +277,7 @@ public class EditPage extends AppCompatActivity implements  ColorWheelView.OnCol
         frameLayout.addView(stickerView);
         movableViews.add(stickerView);
     }
+
     @SuppressLint("ClickableViewAccessibility")
     private void addImageToPage(Bitmap bitmap) {
         // Create ImageView to display the image
@@ -305,6 +291,7 @@ public class EditPage extends AppCompatActivity implements  ColorWheelView.OnCol
         gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
             @Override
             public boolean onDoubleTap(MotionEvent e) {
+                Log.d("DoubleTap", "Double-tap detected!");
                 showImageToolbar(imageViewPage);  // Show toolbar on double tap
                 return true;
             }
@@ -313,8 +300,8 @@ public class EditPage extends AppCompatActivity implements  ColorWheelView.OnCol
         // Set up the touch listener for drag and scaling
         imageViewPage.setOnTouchListener((v, event) -> {
             gestureDetector.onTouchEvent(event); // Detect double-tap event
+            scaleGestureDetector.onTouchEvent(event); // Comment this line to debug double-tap behavior
 
-            scaleGestureDetector.onTouchEvent(event); // Detect pinch-to-zoom gestures
             switch (event.getActionMasked()) {
                 case MotionEvent.ACTION_DOWN:
                     // Store initial touch position for dragging
@@ -338,31 +325,51 @@ public class EditPage extends AppCompatActivity implements  ColorWheelView.OnCol
     }
 
     private void showImageToolbar(ImageView imageView) {
-        // Show the toolbar above the image
         selectedImageView = imageView;
+
+        // Show the toolbar above the image
         imageToolbar.setVisibility(View.VISIBLE);
+        Log.d("ToolbarPosition", "Toolbar Visibility: " + imageToolbar.getVisibility());
 
-        // Get the screen height in pixels
+        // Proceed with calculating the position
+        int toolbarWidth = imageToolbar.getWidth();
+        int toolbarHeight = imageToolbar.getHeight();
+
+        // If width/height is zero, measure the toolbar
+        if (toolbarWidth == 0 || toolbarHeight == 0) {
+            imageToolbar.measure(View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
+                    View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
+            toolbarWidth = imageToolbar.getMeasuredWidth();
+            toolbarHeight = imageToolbar.getMeasuredHeight();
+        }
+
+        // Log dimensions for debugging
+        Log.d("ToolbarPosition", "Toolbar Width: " + toolbarWidth + ", Height: " + toolbarHeight);
+
+        // Calculate Y position for toolbar (from the bottom of the screen)
         int screenHeight = getResources().getDisplayMetrics().heightPixels;
-
-        // Set a fixed offset (100dp) above the bottom of the screen
-        int toolbarHeight = imageToolbar.getHeight(); // Height of the toolbar
-
-        // Convert 100dp to pixels
         float density = getResources().getDisplayMetrics().density;
-        int offsetFromBottom = (int) (150 * density);  // 100dp in pixels
-
-        // Calculate the new Y position for the toolbar (100dp above the bottom of the screen)
+        int offsetFromBottom = (int) (150 * density);  // 150dp in pixels
         int yOffset = screenHeight - offsetFromBottom - toolbarHeight;
 
-        // Set the X position to center it horizontally
-        int xOffset = (getResources().getDisplayMetrics().widthPixels - imageToolbar.getWidth()) / 2;
+        // Log Y offset
+        Log.d("ToolbarPosition", "Toolbar Y Offset: " + yOffset);
+
+        // Calculate X position to center toolbar
+        int xOffset = (getResources().getDisplayMetrics().widthPixels - toolbarWidth) / 2;
+
+        // Log X offset
+        Log.d("ToolbarPosition", "Toolbar X Offset: " + xOffset);
 
         // Set the position of the toolbar
-        imageToolbar.setX(xOffset);
-        imageToolbar.setY(yOffset);
+        imageToolbar.post(() -> {
+            imageToolbar.setX(xOffset);
+            imageToolbar.setY(yOffset);
+            imageToolbar.requestLayout();  // Force layout update
+            imageToolbar.invalidate();     // Force redraw
+            Log.d("ToolbarPosition", "Toolbar positioned at X: " + xOffset + ", Y: " + yOffset);
+        });
     }
-
 
 
     private void deleteImage() {
