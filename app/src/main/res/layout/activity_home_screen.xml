@@ -2,7 +2,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".HomeScreen">
+    tools:context=".HomeScreen"
+    android:background="@color/white">
 
     <TextView
         android:id="@+id/titleText"
@@ -16,18 +17,32 @@
         android:elevation="10dp"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="20dp" />
+        android:layout_marginTop="40dp"
+        android:layout_marginBottom="3dp"/>
+
+    <TextView
+        android:id="@+id/sloganText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="✦ From Moments To Memories ✦"
+        android:textColor="#5d1c34"
+        android:textSize="20sp"
+        android:layout_centerHorizontal="true"
+        android:fontFamily="@font/playfairdisplayregular"
+        android:elevation="10dp"
+        android:layout_below="@id/titleText"
+        android:layout_marginBottom="40dp"/>
 
 
     <GridView
         android:id="@+id/gridView"
         android:layout_width="match_parent"
-        android:layout_height="550dp"
+        android:layout_height="520dp"
         android:columnWidth="130dp"
         android:padding="7dp"
         android:numColumns="2"
         android:gravity="center"
-        android:layout_below="@id/titleText"
+        android:layout_below="@id/sloganText"
         android:stretchMode="columnWidth"
         android:layout_marginHorizontal="20dp"
         android:layout_marginVertical="10dp"
@@ -38,29 +53,31 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:gravity="center"
+        android:gravity="center_horizontal"
         android:layout_centerHorizontal="true"
         android:layout_below="@+id/gridView" >
 
         <ImageButton
-            android:id="@+id/addJournalButton"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:background="@drawable/add" />
+            android:id="@+id/viewJournalButton"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:backgroundTint="#5d1c34"
+            android:background="@drawable/focus"/>
 
         <ImageButton
-            android:id="@+id/viewJournalButton"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_marginStart="10dp"
-            android:background="@drawable/view" />
+            android:id="@+id/addJournalButton"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_margin="110dp"
+            android:background="@drawable/add"/>
+
 
         <ImageButton
             android:id="@+id/deleteJournalButton"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:background="@drawable/bin"
-            android:layout_marginStart="10dp" />
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/bin" />
     </LinearLayout>
 
 
