@@ -1,102 +1,152 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content">
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/rounded_background">
 
     <LinearLayout
         android:id="@+id/popup_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp"
-        android:background="@android:color/white">
+        android:padding="20dp"
+        android:background="@drawable/rounded_background">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Select Category"
-            android:textSize="18sp"
-            android:paddingBottom="8dp" />
+            android:textSize="20sp"
+            android:fontFamily="@font/playfairdisplaybold"
+            android:paddingBottom="12dp"
+            android:layout_gravity="center"
+            android:textColor="#5d1c34" />
 
         <RadioGroup
             android:id="@+id/radio_group"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
 
             <RadioButton
                 android:id="@+id/radio_all"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="All Categories" />
+                android:text="All Categories"
+                android:fontFamily="@font/playfairdisplayregular"
+                android:textColor="#5d1c34"
+                android:buttonTint="#5d1c34"
+                android:textStyle="bold"/>
 
             <RadioButton
                 android:id="@+id/radio_glam"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Glam" />
+                android:text="Glam"
+                android:fontFamily="@font/playfairdisplayregular"
+                android:textColor="#5d1c34"
+                android:buttonTint="#5d1c34"
+                android:textStyle="bold"/>
 
             <RadioButton
                 android:id="@+id/radio_food"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Food" />
+                android:text="Food"
+                android:fontFamily="@font/playfairdisplayregular"
+                android:textColor="#5d1c34"
+                android:buttonTint="#5d1c34"
+                android:textStyle="bold"/>
 
             <RadioButton
                 android:id="@+id/radio_winter"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Winter" />
+                android:text="Winter"
+                android:fontFamily="@font/playfairdisplayregular"
+                android:textColor="#5d1c34"
+                android:buttonTint="#5d1c34"
+                android:textStyle="bold"/>
 
             <RadioButton
                 android:id="@+id/radio_spring"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Spring" />
+                android:text="Spring"
+                android:fontFamily="@font/playfairdisplayregular"
+                android:textColor="#5d1c34"
+                android:buttonTint="#5d1c34"
+                android:textStyle="bold"/>
 
             <RadioButton
                 android:id="@+id/radio_fall"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Fall" />
+                android:text="Fall"
+                android:fontFamily="@font/playfairdisplayregular"
+                android:textColor="#5d1c34"
+                android:buttonTint="#5d1c34"
+                android:textStyle="bold"/>
 
             <RadioButton
                 android:id="@+id/radio_summer"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Summer" />
+                android:text="Summer"
+                android:fontFamily="@font/playfairdisplayregular"
+                android:textColor="#5d1c34"
+                android:buttonTint="#5d1c34"
+                android:textStyle="bold" />
 
             <RadioButton
                 android:id="@+id/radio_celebrations"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Celebrations" />
+                android:text="Celebrations"
+                android:fontFamily="@font/playfairdisplayregular"
+                android:textColor="#5d1c34"
+                android:buttonTint="#5d1c34"
+                android:textStyle="bold" />
 
             <RadioButton
                 android:id="@+id/radio_phrases"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Phrases" />
+                android:text="Phrases"
+                android:fontFamily="@font/playfairdisplayregular"
+                android:textColor="#5d1c34"
+                android:buttonTint="#5d1c34"
+                android:textStyle="bold" />
 
             <RadioButton
                 android:id="@+id/radio_nature"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Nature" />
+                android:text="Nature"
+                android:fontFamily="@font/playfairdisplayregular"
+                android:textColor="#5d1c34"
+                android:buttonTint="#5d1c34"
+                android:textStyle="bold" />
 
             <RadioButton
                 android:id="@+id/radio_other"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Other" />
+                android:text="Other"
+                android:fontFamily="@font/playfairdisplayregular"
+                android:textColor="#5d1c34"
+                android:buttonTint="#5d1c34"
+                android:textStyle="bold" />
 
         </RadioGroup>
 
-        <ImageView
+        <Button
             android:id="@+id/popup_button"
-            android:src="@drawable/search_icon"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_marginTop="16dp"
-            android:layout_gravity="center_horizontal"
-            android:contentDescription="Apply" />
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:layout_gravity="center"
+            android:text="Apply"
+            android:elevation="4dp"
+            android:textColor="#FFF" />
     </LinearLayout>
 </ScrollView>

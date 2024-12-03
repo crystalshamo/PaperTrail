@@ -1,5 +1,6 @@
 package com.example.papertrail;
 
+import android.app.Dialog;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.SQLException;
@@ -8,11 +9,10 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.GridView;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.PopupWindow;
 import android.widget.RadioGroup;
 import android.widget.BaseAdapter;
 import android.view.View;
@@ -45,8 +45,8 @@ public class StickerScreen extends AppCompatActivity {
         createDB();
 
         // Set up the button to show the popup
-        ImageView showPopupButton = findViewById(R.id.show_popup_button);
-        showPopupButton.setOnClickListener(this::showPopup);
+        Button showPopupButton = findViewById(R.id.show_popup_button);
+        showPopupButton.setOnClickListener(view -> showPopup());
 
         // Default category load (load all stickers)
         loadCategory("ALL");
@@ -75,22 +75,28 @@ public class StickerScreen extends AppCompatActivity {
         }
     }
 
-    private void showPopup(View anchorView) {
-        // Inflate the popup layout
-        LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
-        View popupView = inflater.inflate(R.layout.popup_layout, null);
+   public void showPopup() {
+        // Create a Dialog
+        Dialog dialog = new Dialog(this);
 
-        // Create the PopupWindow
-        PopupWindow popupWindow = new PopupWindow(popupView,
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                true);
+        // Set the dialog layout
+        dialog.setContentView(R.layout.popup_layout);
 
-        // Find the RadioGroup
-        RadioGroup radioGroup = popupView.findViewById(R.id.radio_group);
+        // Allow background dimming (default behavior for Dialog)
+        dialog.getWindow().setLayout(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        dialog.getWindow().setGravity(Gravity.CENTER);
 
-        // Set up the button
-       ImageView  popupButton = popupView.findViewById(R.id.popup_button);
+        // Adjust dim amount (optional)
+        WindowManager.LayoutParams params = dialog.getWindow().getAttributes();
+       params.width = (int) (getResources().getDisplayMetrics().widthPixels * 0.7);
+        params.dimAmount = 0.8f; // Increase this value for a darker dim effect
+        dialog.getWindow().setAttributes(params);
+
+        // Find the RadioGroup in the dialog
+        RadioGroup radioGroup = dialog.findViewById(R.id.radio_group);
+
+        // Set up the button in the dialog
+        Button popupButton = dialog.findViewById(R.id.popup_button);
         popupButton.setOnClickListener(v -> {
             int selectedId = radioGroup.getCheckedRadioButtonId();
 
@@ -119,12 +125,17 @@ public class StickerScreen extends AppCompatActivity {
                 loadCategory("O");
             }
 
-            popupWindow.dismiss();
+            dialog.dismiss();
         });
 
-        // Show the popup at the center of the anchor view
-        popupWindow.showAtLocation(anchorView, Gravity.CENTER, 0, 0);
+        // Show the dialog
+        dialog.show();
     }
+
+
+
+
+
 
     private void loadCategory(String categoryCode) {
         String query;
@@ -185,33 +196,40 @@ public class StickerScreen extends AppCompatActivity {
             return position;
         }
 
-
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-            ImageView imageView;
+            ViewHolder holder;
 
             if (convertView == null) {
-                imageView = new ImageView(StickerScreen.this);
-                imageView.setLayoutParams(new GridView.LayoutParams(200, 200)); // Fixed size
-                imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
+                // Inflate the grid_item.xml layout
+                convertView = LayoutInflater.from(StickerScreen.this).inflate(R.layout.sticker_grid_item, parent, false);
+                holder = new ViewHolder();
+                holder.imageView = convertView.findViewById(R.id.item_image);
+                convertView.setTag(holder);
             } else {
-                imageView = (ImageView) convertView;
+                holder = (ViewHolder) convertView.getTag();
             }
 
-            // Set the image resource
+            // Set the image resource and any other properties
             HashMap<String, Object> map = (HashMap<String, Object>) getItem(position);
             int imageId = (int) map.get("image");
-            imageView.setImageResource(imageId);
+            holder.imageView.setImageResource(imageId);
 
             // Set click listener to return the selected sticker
-            imageView.setOnClickListener(v -> {
+            holder.imageView.setOnClickListener(v -> {
                 Intent resultIntent = new Intent();
                 resultIntent.putExtra("selected_sticker", imageId); // Pass the resource ID
                 setResult(RESULT_OK, resultIntent);
                 finish(); // Close the activity
             });
 
-            return imageView;
+            return convertView;
+        }
+
+        private class ViewHolder {
+            ImageView imageView;
+
         }
     }
+
 }

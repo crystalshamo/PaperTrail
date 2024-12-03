@@ -3,6 +3,7 @@ package com.example.papertrail;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -398,6 +399,12 @@ public class EditPage extends AppCompatActivity implements  ColorWheelView.OnCol
         frameLayout.draw(canvas);
 
         databaseHelper.saveImageToPageTable(journalName, pageNumber, bm);
+        // In the activity where you update the cover image
+        SharedPreferences sharedPreferences = getSharedPreferences("cover_update", MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean("cover_updated", true);  // Set the flag to true
+        editor.apply();
+
         Toast.makeText(this, "Saved", Toast.LENGTH_SHORT).show();
     }
 
