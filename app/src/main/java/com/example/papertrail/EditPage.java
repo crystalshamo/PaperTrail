@@ -11,6 +11,7 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -322,6 +323,30 @@ public class EditPage extends AppCompatActivity implements  ColorWheelView.OnCol
         // Add the ImageView to the layout and track it
         frameLayout.addView(imageViewPage);
         movableViews.add(imageViewPage);
+
+        frameLayout.setOnTouchListener((v, event) -> {
+            // Hide the toolbar if the touch is outside the imageView or toolbar
+            if (imageToolbar.getVisibility() == View.VISIBLE
+                    && !isTouchInsideView(imageViewPage, event)
+                    && !isTouchInsideView(imageToolbar, event)) {
+                imageToolbar.setVisibility(View.GONE);
+                Log.d("ToolbarPosition", "Toolbar hidden because touch is outside.");
+            }
+            return false; // Allow other touch events to propagate
+        });
+    }
+
+    private boolean isTouchInsideView(View view, MotionEvent event) {
+        int[] location = new int[2];
+        view.getLocationOnScreen(location);
+
+        int left = location[0];
+        int top = location[1];
+        int right = left + view.getWidth();
+        int bottom = top + view.getHeight();
+
+        // Check if the touch event coordinates are inside the view's boundaries
+        return event.getRawX() >= left && event.getRawX() <= right && event.getRawY() >= top && event.getRawY() <= bottom;
     }
 
     private void showImageToolbar(ImageView imageView) {
@@ -370,6 +395,7 @@ public class EditPage extends AppCompatActivity implements  ColorWheelView.OnCol
             Log.d("ToolbarPosition", "Toolbar positioned at X: " + xOffset + ", Y: " + yOffset);
         });
     }
+
 
 
     private void deleteImage() {
@@ -629,25 +655,22 @@ public class EditPage extends AppCompatActivity implements  ColorWheelView.OnCol
             }
         }
     }
-
     private void showTextEditToolbar(EditText editText) {
         if (textEditToolbar != null) {
             textEditToolbar.dismiss();
         }
 
-
         LinearLayout toolbarLayout = new LinearLayout(this);
         toolbarLayout.setOrientation(LinearLayout.VERTICAL);
-        toolbarLayout.setBackgroundColor(Color.LTGRAY);
+        toolbarLayout.setBackgroundColor(Color.parseColor("#AA000000"));
         toolbarLayout.setPadding(16, 16, 16, 16);
-
 
         LinearLayout buttonLayout = new LinearLayout(this);
         buttonLayout.setOrientation(LinearLayout.HORIZONTAL);
+        buttonLayout.setWeightSum(4);  // Distribute space equally among the 4 buttons
 
-
-        Button btnIncrease = new Button(this);
-        btnIncrease.setText("A+");
+        // Create buttons with black background and white text (No circular background)
+        Button btnIncrease = createToolbarButton("A+");
         btnIncrease.setOnClickListener(v -> {
             float currentSize = editText.getTextSize();
             editText.setTextSize(TypedValue.COMPLEX_UNIT_PX, currentSize + 2);
@@ -656,8 +679,7 @@ public class EditPage extends AppCompatActivity implements  ColorWheelView.OnCol
         });
         buttonLayout.addView(btnIncrease);
 
-        Button btnDecrease = new Button(this);
-        btnDecrease.setText("A-");
+        Button btnDecrease = createToolbarButton("A-");
         btnDecrease.setOnClickListener(v -> {
             float currentSize = editText.getTextSize();
             if (currentSize > 12) {
@@ -668,8 +690,7 @@ public class EditPage extends AppCompatActivity implements  ColorWheelView.OnCol
         });
         buttonLayout.addView(btnDecrease);
 
-        Button btnBold = new Button(this);
-        btnBold.setText("B");
+        Button btnBold = createToolbarButton("B");
         btnBold.setOnClickListener(v -> {
             if (editText.getTypeface() != null) {
                 if (editText.getTypeface().isBold()) {
@@ -685,28 +706,25 @@ public class EditPage extends AppCompatActivity implements  ColorWheelView.OnCol
         });
         buttonLayout.addView(btnBold);
 
-        //font button
-        Button btnFont = new Button(this);
-        btnFont.setText("F");
+        // Font button
+        Button btnFont = createToolbarButton("F");
         btnFont.setOnClickListener(v -> showFontPicker());
         buttonLayout.addView(btnFont);
 
-        // Add color palette (horizontal layout for colors)
+        // Add color palette (center aligned)
         LinearLayout colorPalette = new LinearLayout(this);
         colorPalette.setOrientation(LinearLayout.HORIZONTAL);
         colorPalette.setPadding(8, 8, 8, 8);
 
+        // Center the color palette within the toolbar
+        LinearLayout.LayoutParams colorPaletteParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        colorPaletteParams.gravity = Gravity.CENTER_HORIZONTAL;  // Center the palette within the toolbar
+        colorPalette.setLayoutParams(colorPaletteParams);
 
         String[] hexColors = {
-                "#FF0000",
-                "#FFA500",
-                "#FFFF00",
-                "#008000",
-                "#0000FF",
-                "#800080",
-                "#FFC0CB",
-                "#000000",
-                "#FFFFFF"
+                "#FF0000", "#FFA500", "#FFFF00", "#008000", "#0000FF",
+                "#800080", "#FFC0CB", "#000000", "#FFFFFF"
         };
         for (String hex : hexColors) {
             View colorButton = new View(this);
@@ -771,6 +789,19 @@ public class EditPage extends AppCompatActivity implements  ColorWheelView.OnCol
             }
         });
     }
+
+    // Helper method to create a toolbar button with equal size and black background
+    private Button createToolbarButton(String text) {
+        Button button = new Button(this);
+        button.setText(text);
+        button.setTextColor(Color.WHITE);  // Set text color to white
+        button.setBackgroundColor(Color.parseColor("#000000")); // Set background color to black
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1);  // Use weight to distribute space equally
+        params.setMargins(8, 8, 8, 8);  // Add margins around buttons for spacing
+        button.setLayoutParams(params);
+        return button;
+    }
+
 
     private void showKeyboard(EditText editText) {
         InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
