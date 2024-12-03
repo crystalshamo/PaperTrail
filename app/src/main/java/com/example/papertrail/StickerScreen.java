@@ -1,5 +1,6 @@
 package com.example.papertrail;
 
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
@@ -44,7 +45,7 @@ public class StickerScreen extends AppCompatActivity {
         createDB();
 
         // Set up the button to show the popup
-        Button showPopupButton = findViewById(R.id.show_popup_button);
+        ImageView showPopupButton = findViewById(R.id.show_popup_button);
         showPopupButton.setOnClickListener(this::showPopup);
 
         // Default category load (load all stickers)
@@ -89,7 +90,7 @@ public class StickerScreen extends AppCompatActivity {
         RadioGroup radioGroup = popupView.findViewById(R.id.radio_group);
 
         // Set up the button
-        Button popupButton = popupView.findViewById(R.id.popup_button);
+       ImageView  popupButton = popupView.findViewById(R.id.popup_button);
         popupButton.setOnClickListener(v -> {
             int selectedId = radioGroup.getCheckedRadioButtonId();
 
@@ -184,6 +185,7 @@ public class StickerScreen extends AppCompatActivity {
             return position;
         }
 
+
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             ImageView imageView;
@@ -191,14 +193,23 @@ public class StickerScreen extends AppCompatActivity {
             if (convertView == null) {
                 imageView = new ImageView(StickerScreen.this);
                 imageView.setLayoutParams(new GridView.LayoutParams(200, 200)); // Fixed size
-                imageView.setScaleType(ImageView.ScaleType.FIT_CENTER); // Proper scaling
+                imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
             } else {
                 imageView = (ImageView) convertView;
             }
 
             // Set the image resource
             HashMap<String, Object> map = (HashMap<String, Object>) getItem(position);
-            imageView.setImageResource((int) map.get("image"));
+            int imageId = (int) map.get("image");
+            imageView.setImageResource(imageId);
+
+            // Set click listener to return the selected sticker
+            imageView.setOnClickListener(v -> {
+                Intent resultIntent = new Intent();
+                resultIntent.putExtra("selected_sticker", imageId); // Pass the resource ID
+                setResult(RESULT_OK, resultIntent);
+                finish(); // Close the activity
+            });
 
             return imageView;
         }
