@@ -247,6 +247,7 @@ public class EditPage extends AppCompatActivity implements  ColorWheelView.OnCol
         }
     }
 
+
     private void addStickerToPage(int stickerResId) {
         ImageView stickerView = new ImageView(this);
         stickerView.setImageResource(stickerResId);
@@ -257,10 +258,21 @@ public class EditPage extends AppCompatActivity implements  ColorWheelView.OnCol
         stickerView.setX(100); // Initial position
         stickerView.setY(100);
 
+        // Set up GestureDetector for this sticker
+        GestureDetector gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
+            @Override
+            public boolean onDoubleTap(MotionEvent e) {
+                Log.d("DoubleTap", "Double-tap detected on sticker!");
+                showImageToolbar(stickerView); // Show the same toolbar as images
+                return true;
+            }
+        });
+
+        // Attach touch listener for dragging and gestures
         stickerView.setOnTouchListener((v, event) -> {
-            // Attach touch listener
-            gestureDetector.onTouchEvent(event);
+            gestureDetector.onTouchEvent(event); // Handle gesture events
             scaleGestureDetector.onTouchEvent(event); // Handle scaling
+
             switch (event.getActionMasked()) {
                 case MotionEvent.ACTION_DOWN:
                     initialX = event.getRawX() - v.getX();
@@ -275,9 +287,12 @@ public class EditPage extends AppCompatActivity implements  ColorWheelView.OnCol
             return true;
         });
 
+        // Add the sticker to the layout and track it
         frameLayout.addView(stickerView);
         movableViews.add(stickerView);
     }
+
+
 
     @SuppressLint("ClickableViewAccessibility")
     private void addImageToPage(Bitmap bitmap) {

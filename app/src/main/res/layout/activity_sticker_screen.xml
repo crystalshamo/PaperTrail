@@ -16,30 +16,30 @@
         android:text="Categories"
         android:textSize="16sp"
         android:fontFamily="@font/montserratmedium"
-    android:paddingHorizontal="16dp"
-    android:paddingVertical="10dp"
-    android:layout_marginBottom="16dp" />
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="10dp"
+        android:layout_marginBottom="16dp" />
 
 
 
-        <GridView
-            android:id="@+id/myList"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:numColumns="3"
-            android:verticalSpacing="10dp"
-            android:horizontalSpacing="10dp"
-            android:padding="8dp"
-            android:layout_marginTop="10dp"
-            android:stretchMode="columnWidth"
-            android:clipToPadding="false"
-            android:scrollbars="none" />
+    <GridView
+        android:id="@+id/myList"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:numColumns="3"
+        android:verticalSpacing="10dp"
+        android:horizontalSpacing="10dp"
+        android:padding="8dp"
+        android:layout_marginTop="10dp"
+        android:stretchMode="columnWidth"
+        android:clipToPadding="false"
+        android:scrollbars="none" />
 
     <View
         android:id="@+id/dim_overlay"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="#80000000"
-    android:visibility="gone" />
+        android:visibility="gone" />
 
 </LinearLayout>
