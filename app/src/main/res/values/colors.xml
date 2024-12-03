@@ -3,4 +3,7 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="ripple_color">#909686</color>
+    <color name="button_no_color">#D32F2F</color>
+    <color name="button_yes_color">#388E3C</color>
+    <color name="button_primary">#007BFF</color>
 </resources>

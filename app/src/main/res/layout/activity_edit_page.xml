@@ -8,6 +8,8 @@
     android:background="@android:color/white"
     tools:context=".EditPage">
 
+        <!-- Next Button -->
+
         <FrameLayout
             android:id="@+id/frameLayoutPage"
             android:layout_width="match_parent"
