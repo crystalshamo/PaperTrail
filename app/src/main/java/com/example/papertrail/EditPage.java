@@ -739,7 +739,7 @@ public class EditPage extends AppCompatActivity implements  ColorWheelView.OnCol
 
         String[] hexColors = {
                 "#FF0000", "#FFA500", "#FFFF00", "#008000", "#0000FF",
-                "#800080", "#FFC0CB", "#000000", "#FFFFFF"
+                "#800080", "#FFC0CB", "#000000", "#FFFFFF", "#563d2d"
         };
         for (String hex : hexColors) {
             View colorButton = new View(this);

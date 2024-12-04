@@ -955,7 +955,6 @@ public class PageCurlView extends View {
 
         // Draw the page number (first page is 1 in real life :D
         // there is no page number 0 hehe)
-        drawPageNum(canvas, mIndex);
     }
 
     /**
@@ -988,7 +987,6 @@ public class PageCurlView extends View {
 
         // Draw the page number (first page is 1 in real life :D
         // there is no page number 0 hehe)
-        drawPageNum(canvas, mIndex);
 
         canvas.restore();
     }
@@ -1022,12 +1020,6 @@ public class PageCurlView extends View {
      * @param canvas
      * @param pageNum
      */
-    private void drawPageNum(Canvas canvas, int pageNum)
-    {
-        mTextPaint.setColor(Color.WHITE);
-        String pageNumText = "- "+pageNum+" -";
-        drawCentered(canvas, pageNumText,canvas.getHeight()-mTextPaint.getTextSize()-5,mTextPaint,mTextPaintShadow);
-    }
 
     //---------------------------------------------------------------
     // Debug draw methods
