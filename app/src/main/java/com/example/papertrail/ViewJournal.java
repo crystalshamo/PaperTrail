@@ -48,6 +48,5 @@ public class ViewJournal extends AppCompatActivity {
         curlview.setCurlView(dbhelper.getAllPagesAsBitmaps(journalName));
 
         journaltv = findViewById(R.id.journaltitle);
-        journaltv.setText(journalName);
-    }
+        journaltv.setText("⋆ " + journalName + " ⋆"); }
 }
