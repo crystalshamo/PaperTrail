@@ -10,6 +10,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
@@ -21,10 +22,12 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.GestureDetector;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.ArrayAdapter;
@@ -32,6 +35,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -53,7 +57,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class EditPage extends AppCompatActivity implements  ColorWheelView.OnColorSelectedListener {
+public class EditPage extends AppCompatActivity  {
     private EditText lastFocusedEditText = null; // Track the last focused EditText
 
 
@@ -64,6 +68,11 @@ public class EditPage extends AppCompatActivity implements  ColorWheelView.OnCol
     private DatabaseHelper databaseHelper;
     private PopupWindow textEditToolbar;
     private GestureDetector gestureDetector;
+
+    private SeekBar redSeekBar, greenSeekBar, blueSeekBar;
+    private TextView redTextView, greenTextView, blueTextView;
+    private View popupView;
+    private PopupWindow popupWindow;
 
 
     private static final int PICK_IMAGE_REQUEST = 1;
@@ -80,7 +89,6 @@ public class EditPage extends AppCompatActivity implements  ColorWheelView.OnCol
     private Bitmap bm = null;
     private BottomNavigationView bottomNavigationView;
     private ImageView selectedImageView = null;
-    private ColorWheelView colorWheelView;
     Intent stickerIntent;
 
     @Override
@@ -130,7 +138,6 @@ public class EditPage extends AppCompatActivity implements  ColorWheelView.OnCol
         addPageButton = findViewById(R.id.buttonAddPage);
         deletePageButton = findViewById(R.id.buttonDeletePage);
         paintButton = findViewById(R.id.buttonPaint);
-        colorWheelView = findViewById(R.id.colorWheelView);
 
         imageToolbar = findViewById(R.id.imageToolbar);
         findViewById(R.id.btnDelete).setOnClickListener(v -> deleteImage());
@@ -142,9 +149,7 @@ public class EditPage extends AppCompatActivity implements  ColorWheelView.OnCol
         addPageButton.setOnClickListener(v -> incrementPage());
         captureButton.setOnClickListener(v -> savePage());
         deletePageButton.setOnClickListener(v -> deletePage());
-
-        paintButton.setOnClickListener(v -> colorWheelView.setVisibility(View.VISIBLE));
-        colorWheelView.setOnColorSelectedListener(this);
+        paintButton.setOnClickListener(v -> showColorPickerPopup());
 
 
         scaleGestureDetector = new ScaleGestureDetector(this, new ScaleListener());
@@ -411,6 +416,70 @@ public class EditPage extends AppCompatActivity implements  ColorWheelView.OnCol
         });
     }
 
+    private void showColorPickerPopup() {
+        // Create an AlertDialog builder
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Select Color");
+
+        // Inflate the custom layout for the RGB SeekBars
+        View popupView = getLayoutInflater().inflate(R.layout.color_seekbar, null);
+        builder.setView(popupView);
+
+        // Initialize the SeekBars and TextViews
+        SeekBar redSeekBar = popupView.findViewById(R.id.redSB);
+        SeekBar greenSeekBar = popupView.findViewById(R.id.greenSB);
+        SeekBar blueSeekBar = popupView.findViewById(R.id.blueSB);
+
+        TextView redTextView = popupView.findViewById(R.id.redTV);
+        TextView greenTextView = popupView.findViewById(R.id.greenTV);
+        TextView blueTextView = popupView.findViewById(R.id.blueTV);
+
+
+        // Create the dialog
+        AlertDialog dialog = builder.create();
+
+        // Set up SeekBar listeners, passing the initialized views as parameters
+        setupSeekBarListeners(redSeekBar, greenSeekBar, blueSeekBar, redTextView, greenTextView, blueTextView, frameLayout);
+
+        // Show the dialog
+        dialog.show();
+    }
+
+    private void setupSeekBarListeners(SeekBar redSeekBar, SeekBar greenSeekBar, SeekBar blueSeekBar,
+                                       TextView redTextView, TextView greenTextView, TextView blueTextView,
+                                       FrameLayout frameLayout) {
+
+        // Define listener to update the color dynamically
+        SeekBar.OnSeekBarChangeListener listener = new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                // Update RGB TextViews
+                redTextView.setText(String.valueOf(redSeekBar.getProgress()));
+                greenTextView.setText(String.valueOf(greenSeekBar.getProgress()));
+                blueTextView.setText(String.valueOf(blueSeekBar.getProgress()));
+
+                // Calculate combined color
+                int red = redSeekBar.getProgress();
+                int green = greenSeekBar.getProgress();
+                int blue = blueSeekBar.getProgress();
+                int color = Color.rgb(red, green, blue);
+
+
+                frameLayout.setBackgroundColor(color);
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {}
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {}
+        };
+
+        // Attach listener to all SeekBars
+        redSeekBar.setOnSeekBarChangeListener(listener);
+        greenSeekBar.setOnSeekBarChangeListener(listener);
+        blueSeekBar.setOnSeekBarChangeListener(listener);
+    }
 
 
     private void deleteImage() {
@@ -429,11 +498,6 @@ public class EditPage extends AppCompatActivity implements  ColorWheelView.OnCol
     }
 
 
-    @Override
-    public void onColorSelected(int color) {
-        frameLayout.setBackgroundColor(color);
-        colorWheelView.setVisibility(View.GONE);
-    }
 
     private void savePage() {
         Integer pageNumber = viewModel.getCurrentPage().getValue();
@@ -607,6 +671,7 @@ public class EditPage extends AppCompatActivity implements  ColorWheelView.OnCol
         new AlertDialog.Builder(this)
                 .setTitle("Select a Font\n")
                 .setAdapter(fontAdapter, (dialog, which) -> {
+
                     // Apply the selected font (if you need to handle it)
                     applyFont(fontNames[which]);
                 })

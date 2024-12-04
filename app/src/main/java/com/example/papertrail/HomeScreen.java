@@ -98,7 +98,6 @@ public class HomeScreen extends AppCompatActivity {
 
 
 
-
     private void deleteJournal(String selectedJournal) {
         myDbHelper.deleteJournal(selectedJournal);
         journalNames = myDbHelper.getJournalNames();
@@ -125,6 +124,8 @@ public class HomeScreen extends AppCompatActivity {
 
         View popupView = getLayoutInflater().inflate(R.layout.add_toast, null);
         builder.setView(popupView);
+
+
 
         EditText editTextJournalName = popupView.findViewById(R.id.editTextJournalName);
         Button btnAddJournal = popupView.findViewById(R.id.btnAddJournal);

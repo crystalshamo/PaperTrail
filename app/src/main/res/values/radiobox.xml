@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="text" parent="TextAppearance.AppCompat">
+        <item name="android:textSize">12sp</item>
+        <item name="android:textColor">#A17D61</item>
+    </style>
+    <style name="text2" parent="TextAppearance.AppCompat">
+        <item name="android:textSize">15sp</item>
+        <item name="android:textColor">#A9A8AD</item>
+    </style>
+    <style name="ButtonStyle" parent="Widget.AppCompat.Button">
+        <item name="colorPrimary">@android:color/holo_orange_dark</item>
+        <item name="android:textColorSecondary">@android:color/holo_purple</item>
+    </style>
+    <style name="MySeekBarGreen" parent="Widget.AppCompat.ActionBar">
+        <item name="android:progressBackgroundTint">#A5D6A7</item>
+        <item name="android:progressTint">#66BB6A</item>
+        <item name="android:colorControlActivated">#388E3C</item>
+    </style>
+    <style name="MySeekBarBlue" parent="Widget.AppCompat.ActionBar">
+        <item name="android:progressBackgroundTint">#8BB8E8</item>
+        <item name="android:progressTint">#3B9ED8</item>
+        <item name="android:colorControlActivated">#1E6A9D</item>
+    </style>
+    <style name="MySeekBarRed" parent="Widget.AppCompat.ActionBar">
+        <item name="android:progressBackgroundTint">#F08080</item>
+        <item name="android:progressTint">#CD5C5C</item>
+        <item name="android:colorControlActivated">#DC143C</item>
+    </style>
+
+</resources>
