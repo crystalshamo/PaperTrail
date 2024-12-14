@@ -17,8 +17,8 @@ PaperTrail is an Android scrapbook application that allows users to create and c
 - **Android Studio**: IDE for building the app.
 - **Java**: Programming language used to build the app’s logic.
 - **XML**: Used for layout design and user interface.
-- **SQLite**: Local database used to store journal data.
-- **Camera API**: For taking and inserting photos from the camera.
+- **SQLite**: Local database used to store journal data and stickers. 
+- **Camera Access**: For accessing images from the user's camera roll or taking new photos through Android's camera functionality.
 
 
 
