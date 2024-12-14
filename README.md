@@ -5,10 +5,10 @@ PaperTrail is an Android scrapbook application that allows users to create and c
 ## Features
 
 - **Create Journals**: Create multiple journals and customize each one with different pages.
-- **Add and Customize Text**: Add text to any page and customize the font, color, size, and style (bold, italics).
+- **Add and Customize Text**: Add text to any page and customize the font, color, size, and style (bold).
 - **Insert Images**: Insert images from the user's camera roll or take new pictures using the camera.
 - **Add Stickers**: Personalize each page with fun stickers.
-- **Manage Pages**: Add, remove, or reorder pages within a journal.
+- **Manage Pages**: Add or remove pages within a journal.
 - **Save and View**: Save your journals and view them in a unique curl-view format, simulating page flips for a scrapbook-like experience.
 - **SQL Database**: All data and stickers are stored in an SQLite database to ensure your journals are saved securely.
 
