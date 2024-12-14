@@ -1,6 +1,6 @@
 # PaperTrail: Scrapbook Journal App
 
-PaperTrail is an Android scrapbook application that allows users to create and customize digital journals. With PaperTrail, users can create unique scrapbook-style journals by adding pages, inserting text, images, and stickers, and even customizing the layout of each page. The app allows users to save their journals, view them in a flipping pages style, and personalize the text with different font sizes, colors, and styles.
+PaperTrail is an Android scrapbook application that allows users to create and customize digital journals. With PaperTrail, users can create unique scrapbook-style journals by adding pages, inserting text, images, and stickers, and even customizing the layout of each page. The app allows users to save their journals and view them in a flipping pages style.
 
 ## Features
 
