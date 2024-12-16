@@ -5,6 +5,9 @@
 
 Paper Trail is an Android scrapbooking application that allows users to create and customize digital journals. With Paper Trail, users can create unique scrapbook-style journals by adding pages, inserting text, images, and stickers, and even customizing the layout of each page. The app allows users to save their journals and view them with a page-flipping animation.
 
+Here is a short demo: https://youtu.be/fHfU4hOsnqE?si=X4_u0Kng-63g_KQ2
+
+
 ## Features
 
 - **Create Journals**: Create multiple journals and customize each one with different pages.
